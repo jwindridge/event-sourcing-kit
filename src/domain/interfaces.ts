@@ -1,39 +1,18 @@
-interface ICommandMetadata {
-  timestamp?: number;
-  correlationId?: string;
-  [others: string]: any;
-}
-
-export interface ICommand {
-  // Aggregate that this command should be applied to
-  aggregate: {
-    // Identifier of the aggregate, or `null` if this is for a new instance
-    id: string | null;
-
-    // Name of the aggregate
-    name: string;
-  };
-
-  // Name of the relevant aggregate's command
+export interface IDomainCommand {
+  // Name of the command
   name: string;
 
-  // Paramters associated with this command
+  // Parameters associated with this command
   payload: any;
 
-  // Identifying data for the User initiating the command
+  // User initiating the command
   user?: object;
-}
 
-export interface IRejectableCommand extends ICommand {
+  // Reject a command if it isn't valid
   reject: (reason: string) => void;
 }
 
-interface IEventMetadata {
-  timestamp?: number;
-  correlationId?: string;
-}
-
-export interface IEvent {
+export interface IDomainEvent {
   // Aggregate that published this event
   aggregate: {
     id: string;
@@ -45,46 +24,39 @@ export interface IEvent {
   name: string;
 
   // Data associated with this event
-  payload: any;
+  payload?: any;
 }
 
-export interface ICommandWithMetadata extends ICommand {
-  // Unique identifier for this command
-  id: string;
+export interface IAggregateInstance<T> {
+  // Boolean value indicating whether this instance already exists or is not yet created
+  exists: boolean;
 
-  // Metadata about this command
-  metadata?: ICommandMetadata;
-}
+  // Publish domain events if commands pass business rules
+  publish: (type: string, data?: object) => void;
 
-export interface IEventWithMetadata extends IEvent {
-  // Unique identifier for this event
-  id: string;
-
-  // Metadata about this event
-  metadata: IEventMetadata;
+  // Current state of the aggregate
+  state: T
 }
 
 export interface IVersionedEntity<T> {
-  readonly id: string;
-  readonly name: string;
-  readonly version: number;
-  readonly state: T;
-  update: (newState: T) => IVersionedEntity<T>;
-  [others: string]: any;
+  // Current state of the entity
+  state: T;
+
+  update: (state: T) => IVersionedEntity<T>;
+
+  // Current version of the entity
+  version: number;
 }
+
 
 export interface IEventHandlerMap<T> {
-  [s: string]: (state: T, event: IEvent) => T;
-}
-
-export interface IPublishableEntity<T> extends IVersionedEntity<T> {
-  publish: (name: string, data?: object) => void;
+  [s: string]: (state: T, event: IDomainEvent) => T;
 }
 
 export interface ICommandHandlerMap<T> {
   [s: string]: (
-    entity: IPublishableEntity<T>,
-    command: IRejectableCommand
+    entity: IAggregateInstance<T>,
+    command: IDomainCommand
   ) => void;
 }
 
@@ -103,11 +75,11 @@ export interface IAggregateDefinition<T> {
 export interface IAggregate<T> {
   readonly name: string;
   rehydrate: (
-    events: IEvent[],
+    events: IDomainEvent[],
     snapshot?: IVersionedEntity<T>
   ) => IVersionedEntity<T>;
   applyCommand: (
-    entity: IPublishableEntity<T>,
-    command: IRejectableCommand
+    entity: IAggregateInstance<T>,
+    command: IDomainCommand
   ) => void;
 }

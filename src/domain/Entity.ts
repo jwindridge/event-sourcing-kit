@@ -1,29 +1,21 @@
 import { IVersionedEntity } from './interfaces';
 
 interface IParams<T> {
-  id: string;
-  name: string;
-  version: number;
   state: T;
+  version: number;
 }
 
-export function makeEntity<T>({
-  id,
-  name,
+export function makeVersionedEntity<T>({
   state,
   version
 }: IParams<T>): IVersionedEntity<T> {
   const update = (newState: T) =>
-    makeEntity({
-      id,
-      name,
+    makeVersionedEntity({
       state: newState,
       version: version + 1
     });
 
   return {
-    id,
-    name,
     state,
     update,
     version

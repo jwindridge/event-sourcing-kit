@@ -1,4 +1,4 @@
-import * as AppendOnlyStore from './append-only-store/interfaces';
+import * as AppendOnlyStore from './AppendOnlyStore/interfaces';
 
 export { AppendOnlyStore };
 
