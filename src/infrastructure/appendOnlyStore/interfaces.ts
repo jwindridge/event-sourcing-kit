@@ -1,11 +1,15 @@
 export interface IStreamData {
   streamId: string;
-  data: object;
+  data: any;
 }
 
 export interface IVersionedData {
   version: number;
-  data: object;
+  data: any;
+}
+
+export interface IAppendOnlyStoreParams {
+  type: 'in-memory' | 'filesystem';
 }
 
 export interface IAppendOnlyStore {

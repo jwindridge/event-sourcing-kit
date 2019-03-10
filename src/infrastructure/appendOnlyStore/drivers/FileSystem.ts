@@ -4,7 +4,7 @@ import { dirname } from 'path';
 import { ConcurrencyError } from '../../errors';
 import { IAppendOnlyStore, IStreamData, IVersionedData } from '../interfaces';
 
-interface IParams {
+export interface IFileSystemDriverParams {
   filepath: string;
 }
 
@@ -48,7 +48,7 @@ async function getAllRecords(filepath: string): Promise<IRecord[]> {
 
 export function createFileSystemDriver({
   filepath
-}: IParams): IAppendOnlyStore {
+}: IFileSystemDriverParams): IAppendOnlyStore {
   const getRecordsForStream = async (streamId: string): Promise<IRecord[]> => {
     return getAllRecords(filepath).then(records =>
       records.filter(r => r.streamId === streamId)

@@ -1,8 +1,8 @@
 import test from 'ava';
 
-import { createAggregate } from './Aggregate';
+import { createAggregate, IAggregateDefinition } from './Aggregate';
 import { makeVersionedEntity } from './Entity';
-import { IAggregateDefinition, IDomainEvent } from './interfaces';
+import { IDomainEvent } from './Event';
 
 interface ICounter {
   count: number;
@@ -10,7 +10,7 @@ interface ICounter {
 
 const counterDefinition: IAggregateDefinition<ICounter> = {
   commands: {
-    increment: entity => entity.publish('incremented'),
+    increment: entity => entity.publish('incremented')
   },
   eventHandlers: {
     incremented: (state, event) => ({
@@ -58,7 +58,7 @@ test('VersionedEntity: update', (t: any) => {
 
   t.not(entity, updated);
 
-   t.is(updated.version, 1);
+  t.is(updated.version, 1);
   t.deepEqual(updated.state, { count: 2 });
 });
 

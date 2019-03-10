@@ -1,2 +1,2 @@
-export { createFileSystemDriver, createInMemoryDriver } from './drivers';
-export * from './interfaces';
+export { IAppendOnlyStore, IAppendOnlyStoreParams } from './interfaces';
+export { getAppendOnlyStoreConnection } from './factory';
