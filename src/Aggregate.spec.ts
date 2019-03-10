@@ -65,13 +65,16 @@ test('VersionedEntity: update', (t: any) => {
 test('Aggregate: rehydrate', (t: any) => {
   const { id, entityName, aggregate } = t.context;
 
+  let version = 0;
+
   const genEvent = (): IDomainEvent => ({
     aggregate: {
       id,
       name: entityName
     },
     name: 'incremented',
-    payload: { size: Math.floor(Math.random() * 100) }
+    payload: { size: Math.floor(Math.random() * 100) },
+    version: version++
   });
 
   const events = Array(100)

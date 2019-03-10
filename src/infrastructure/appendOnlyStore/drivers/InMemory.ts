@@ -1,4 +1,4 @@
-import { IAppendOnlyStore, IStreamData, IVersionedData } from '../interfaces';
+import { IAppendOnlyStore, IStreamData } from '../interfaces';
 
 import { ConcurrencyError } from '../../errors';
 
@@ -56,7 +56,7 @@ export function createInMemoryDriver(): IAppendOnlyStore & IDirectDataAccess {
     streamId: string,
     afterVersion = 0,
     maxCount?: number
-  ): Promise<IVersionedData[]> => {
+  ): Promise<IStreamData[]> => {
     const streamData = streamsById[streamId] || [];
 
     const selectedData = streamData.slice(
@@ -65,7 +65,7 @@ export function createInMemoryDriver(): IAppendOnlyStore & IDirectDataAccess {
     );
 
     return new Promise(r =>
-      r(selectedData.map((d, i) => ({ version: i + 1, data: d })))
+      r(selectedData.map((d, i) => ({ streamId, version: i + 1, data: d })))
     );
   };
 

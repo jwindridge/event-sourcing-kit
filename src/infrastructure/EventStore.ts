@@ -11,14 +11,9 @@ interface IEventStoreParams {
   appendOnlyStoreParams?: IAppendOnlyStoreParams;
 }
 
-export interface IStoredEvent extends IDomainEvent {
-  // Set if loading all events for a single entity
-  version?: number;
-}
-
 export interface IEventStream {
   streamId: string;
-  events: IStoredEvent[];
+  events: IDomainEvent[];
 }
 
 export interface IEventStore {
@@ -31,7 +26,7 @@ export interface IEventStore {
   loadAllEvents(
     skipEvents?: number,
     maxCount?: number
-  ): Promise<IStoredEvent[]>;
+  ): Promise<IDomainEvent[]>;
 
   appendToStream(
     id: IAggregateId,
@@ -53,7 +48,7 @@ export function makeEventStore({
   store,
   appendOnlyStoreParams
 }: IEventStoreParams): IEventStore {
-  const eventStore = !!store
+  const underlyingStore = !!store
     ? store
     : getAppendOnlyStoreConnection(appendOnlyStoreParams!);
 
@@ -64,7 +59,7 @@ export function makeEventStore({
   ): Promise<IEventStream> => {
     const streamId = getStreamId(aggregateId);
 
-    const records = await eventStore.readRecords(
+    const records = await underlyingStore.readRecords(
       streamId,
       skipEvents,
       maxCount
@@ -87,10 +82,11 @@ export function makeEventStore({
     skipEvents?: number,
     maxCount?: number
   ): Promise<IDomainEvent[]> => {
-    const records = await eventStore.readAllRecords(skipEvents, maxCount);
-    return records.map(({ streamId, data: { name, payload } }) => ({
+    const records = await underlyingStore.readAllRecords(skipEvents, maxCount);
+    return records.map(({ streamId, data: { name, payload }, version }) => ({
       name,
       payload,
+      version,
       aggregate: getAggregateId(streamId)
     }));
   };
@@ -102,7 +98,7 @@ export function makeEventStore({
   ): Promise<void> => {
     const streamId = getStreamId(aggregateId);
     const data = events.map(({ name, payload }) => ({ name, payload }));
-    return eventStore.appendAll(streamId, data, expectedVersion);
+    return underlyingStore.appendAll(streamId, data, expectedVersion);
   };
 
   return {

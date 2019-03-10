@@ -9,4 +9,7 @@ export interface IDomainEvent {
 
   // Data associated with this event
   payload?: any;
+
+  // Version of the aggregate at the time this event was emitted
+  version: number;
 }

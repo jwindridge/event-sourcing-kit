@@ -1,11 +1,7 @@
 export interface IStreamData {
   streamId: string;
   data: any;
-}
-
-export interface IVersionedData {
   version: number;
-  data: any;
 }
 
 export interface IAppendOnlyStoreParams {
@@ -29,7 +25,7 @@ export interface IAppendOnlyStore {
     streamId: string,
     afterVersion?: number,
     maxCount?: number
-  ): Promise<IVersionedData[]>;
+  ): Promise<IStreamData[]>;
 
   readAllRecords(
     afterVersion?: number,

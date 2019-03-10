@@ -10,4 +10,7 @@ export interface IDomainCommand {
 
   // Reject a command if it isn't valid
   reject: (reason: string) => void;
+
+  // Version number of the aggregate at the time the command was initiated
+  expectedVersion: number;
 }

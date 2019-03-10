@@ -56,7 +56,9 @@ test('readRecords', async (t: any) => {
 
   t.deepEqual(
     records,
-    stream1Data.slice(0, 2).map((data, i) => ({ version: i + 1, data }))
+    stream1Data
+      .slice(0, 2)
+      .map((data, i) => ({ data, streamId: stream1, version: i + 1 }))
   );
 });
 

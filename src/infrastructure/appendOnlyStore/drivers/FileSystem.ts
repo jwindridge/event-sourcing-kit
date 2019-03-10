@@ -2,7 +2,7 @@ import fs from 'async-file';
 import { dirname } from 'path';
 
 import { ConcurrencyError } from '../../errors';
-import { IAppendOnlyStore, IStreamData, IVersionedData } from '../interfaces';
+import { IAppendOnlyStore, IStreamData } from '../interfaces';
 
 export interface IFileSystemDriverParams {
   filepath: string;
@@ -99,7 +99,7 @@ export function createFileSystemDriver({
     streamId: string,
     afterVersion = 0,
     maxCount?: number
-  ): Promise<IVersionedData[]> => {
+  ): Promise<IStreamData[]> => {
     const filteredRecords = await getRecordsForStream(streamId).then(records =>
       records.filter(r => r.version > afterVersion)
     );
@@ -107,14 +107,11 @@ export function createFileSystemDriver({
   };
 
   const readAllRecords = async (
-    afterVersion = 0,
+    skip = 0,
     maxCount?: number
   ): Promise<IStreamData[]> => {
-    const filteredRecords = await getAllRecords(filepath).then(records =>
-      records.filter(r => r.version > afterVersion)
-    );
-
-    return filteredRecords.slice(afterVersion, maxCount);
+    const allRecords = await getAllRecords(filepath);
+    return allRecords.slice(skip, maxCount && skip + maxCount);
   };
 
   return {
