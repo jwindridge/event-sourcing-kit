@@ -43,6 +43,20 @@ test('appendAll', async (t: any) => {
   t.deepEqual(t.context.driver.data.streamsById[streamId], stream1Data);
 });
 
+test('appendAll: concurrency error', async (t: any) => {
+  const streamId = 'dummy';
+  await t.context.driver.append(streamId, stream1Data[0], 0);
+  await t.context.driver.append(streamId, stream1Data[1], 1);
+
+  const shouldError = async () =>
+    t.context.driver.appendAll(streamId, stream1Data.slice(2), 1);
+
+  await t.throwsAsync(shouldError, {
+    instanceOf: ConcurrencyError,
+    message: 'Expected stream "dummy" version to be 1, got 2'
+  });
+});
+
 test('readRecords', async (t: any) => {
   const stream1 = 's1';
   const stream2 = 's2';
@@ -52,7 +66,7 @@ test('readRecords', async (t: any) => {
   await t.context.driver.append(stream1, stream1Data[1], 1);
   await t.context.driver.append(stream2, stream2Data[1], 1);
 
-  const records = await t.context.driver.readRecords(stream1, 0);
+  const records = await t.context.driver.readRecords(stream1);
 
   t.deepEqual(
     records,
