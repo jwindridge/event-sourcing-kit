@@ -17,9 +17,14 @@ export function createInMemoryDriver(): IEventStore {
   const allEvents: IApplicationEvent[] = [];
 
   const getStreamId = (aggregate: IAggregateId) => JSON.stringify(aggregate);
+  
+  const getStream = (aggregate: IAggregateId): IInMemoryEvent[] => {
+    const streamId = getStreamId(aggregate);
+    return streamsByAggregate[streamId] || [];
+  }
 
   const checkVersion = (aggregate: IAggregateId, expectedVersion: number) => {
-    const stream = streamsByAggregate[getStreamId(aggregate)] || [];
+    const stream = getStream(aggregate);
     const actualVersion = stream.length;
 
     if (actualVersion !== expectedVersion) {
@@ -48,8 +53,8 @@ export function createInMemoryDriver(): IEventStore {
     skip?: number,
     limit?: number
   ): Promise<IApplicationEvent[]> {
-    const streamId = getStreamId(aggregate);
-    const events = streamsByAggregate[streamId].slice(skip).slice(0, limit);
+    const stream = getStream(aggregate);
+    const events = stream.slice(skip).slice(0, limit);
 
     return Promise.resolve(
       events.map((e, idx) => convertToApplicationEvent(aggregate, e, idx))
@@ -65,7 +70,7 @@ export function createInMemoryDriver(): IEventStore {
 
     const streamId = getStreamId(aggregate);
 
-    const stream = streamsByAggregate[streamId] || [];
+    const stream = getStream(aggregate);
     const inMemoryEvent = { event, id: nextEventId++ };
     const applicationEvent = convertToApplicationEvent(
       aggregate,
@@ -90,7 +95,7 @@ export function createInMemoryDriver(): IEventStore {
 
     const streamId = getStreamId(aggregate);
 
-    const stream = streamsByAggregate[streamId] || [];
+    const stream = getStream(aggregate);
     const inMemoryEvents = events.map(event => ({ event, id: nextEventId++ }));
     const applicationEvents = inMemoryEvents.map((e, idx) =>
       convertToApplicationEvent(aggregate, e, stream.length + idx)
