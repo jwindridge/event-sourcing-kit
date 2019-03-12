@@ -5,7 +5,7 @@ import { IAggregateId } from './interfaces';
 
 export interface IApplicationCommand extends IDomainCommand {
   // Unique identifier for this command
-  id: string | number;
+  id: string;
 
   // Aggregate that should receive this command
   aggregate: IAggregateId;
@@ -14,7 +14,7 @@ export interface IApplicationCommand extends IDomainCommand {
   version: number;
 }
 
-export function createCommand(aggregate: IAggregateId, version: number, name: string, reject: IRejectFunction, data?: object, id?: string | number, user?: object): IApplicationCommand {
+export function createCommand(aggregate: IAggregateId, version: number, name: string, reject: IRejectFunction, data?: object, id?: string, user?: object): IApplicationCommand {
   const domainCommand = createDomainCommand(name, reject, data);
 
   return {
