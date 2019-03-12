@@ -1,6 +1,10 @@
 import uuid from 'uuid';
 
-import { createCommand as createDomainCommand, IDomainCommand, IRejectFunction } from '../domain'
+import {
+  createCommand as createDomainCommand,
+  IDomainCommand,
+  IRejectFunction
+} from '../domain';
 import { IAggregateId } from './interfaces';
 
 export interface IApplicationCommand extends IDomainCommand {
@@ -14,7 +18,15 @@ export interface IApplicationCommand extends IDomainCommand {
   version: number;
 }
 
-export function createCommand(aggregate: IAggregateId, version: number, name: string, reject: IRejectFunction, data?: object, id?: string, user?: object): IApplicationCommand {
+export function createCommand(
+  aggregate: IAggregateId,
+  version: number,
+  name: string,
+  reject: IRejectFunction,
+  data?: object,
+  id?: string,
+  user?: object
+): IApplicationCommand {
   const domainCommand = createDomainCommand(name, reject, data);
 
   return {
@@ -22,6 +34,6 @@ export function createCommand(aggregate: IAggregateId, version: number, name: st
     aggregate,
     user,
     version,
-    id: id || uuid.v4()    
-  }
+    id: id || uuid.v4()
+  };
 }

@@ -11,17 +11,17 @@ interface IInMemoryEvent {
 }
 
 export function createInMemoryDriver(): IEventStore {
-  let nextEventId = 0;
+  let nextEventId = 1;
 
   const streamsByAggregate: { [s: string]: IInMemoryEvent[] } = {};
   const allEvents: IApplicationEvent[] = [];
 
   const getStreamId = (aggregate: IAggregateId) => JSON.stringify(aggregate);
-  
+
   const getStream = (aggregate: IAggregateId): IInMemoryEvent[] => {
     const streamId = getStreamId(aggregate);
     return streamsByAggregate[streamId] || [];
-  }
+  };
 
   const checkVersion = (aggregate: IAggregateId, expectedVersion: number) => {
     const stream = getStream(aggregate);

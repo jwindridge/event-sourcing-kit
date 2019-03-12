@@ -19,7 +19,10 @@ export interface IEventHandlerMap<T> {
 }
 
 export interface ICommandHandlerMap<T> {
-  [s: string]: (entity: IAggregateInstance<T>, command: IDomainCommand) => IDomainEvent | IDomainEvent[] | void;
+  [s: string]: (
+    entity: IAggregateInstance<T>,
+    command: IDomainCommand
+  ) => IDomainEvent | IDomainEvent[] | void;
 }
 
 export interface IAggregateDefinition<T> {
@@ -80,9 +83,9 @@ export function createAggregate<T>(
     const events = commands[name] && commands[name](entity, command);
 
     if (events !== undefined) {
-      return Array.isArray(events) ? events : [events]
+      return Array.isArray(events) ? events : [events];
     }
-    return []
+    return [];
   };
 
   return {

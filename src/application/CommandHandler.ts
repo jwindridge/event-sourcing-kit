@@ -1,27 +1,43 @@
 import { IAggregate } from '../domain';
-import { createAggregateRepository, IAggregateRepository } from '../infrastructure/aggregateRepository';
-import { createEventStore, IEventStore, IStorageDriverOpts } from '../infrastructure/eventstore';
+import {
+  createAggregateRepository,
+  IAggregateRepository
+} from '../infrastructure/aggregateRepository';
+import {
+  createEventStore,
+  IEventStore,
+  IStorageDriverOpts
+} from '../infrastructure/eventstore';
 
 import { IApplicationCommand } from './Command';
 import { IApplicationEvent } from './Event';
 
-
-export type ICommandHandler = (command: IApplicationCommand) => Promise<IApplicationEvent[] | void>;
+export type ICommandHandler = (
+  command: IApplicationCommand
+) => Promise<IApplicationEvent[] | void>;
 
 interface IExplicitEventStoreOptions {
-  store: IEventStore
+  store: IEventStore;
 }
 
 interface ICommandHandlerFactoryOptions {
-  eventStore: IExplicitEventStoreOptions | IStorageDriverOpts
+  eventStore: IExplicitEventStoreOptions | IStorageDriverOpts;
 }
 
-function isExplicitEventStore(opts: IExplicitEventStoreOptions | IStorageDriverOpts): opts is IExplicitEventStoreOptions {
+function isExplicitEventStore(
+  opts: IExplicitEventStoreOptions | IStorageDriverOpts
+): opts is IExplicitEventStoreOptions {
   return (opts as IExplicitEventStoreOptions).hasOwnProperty('store');
 }
 
-async function processCommand<T>(aggregate: IAggregate<T>, repository: IAggregateRepository<T>, command: IApplicationCommand) {
-  const { aggregate: { id, name } } = command;
+async function processCommand<T>(
+  aggregate: IAggregate<T>,
+  repository: IAggregateRepository<T>,
+  command: IApplicationCommand
+) {
+  const {
+    aggregate: { id, name }
+  } = command;
   const entity = await repository.getById(id!);
 
   const wrapReject = (cmd: IApplicationCommand): IApplicationCommand => {
@@ -45,16 +61,21 @@ async function processCommand<T>(aggregate: IAggregate<T>, repository: IAggregat
   return Promise.resolve();
 }
 
-export const commandHandlerFactory = ({ eventStore }: ICommandHandlerFactoryOptions) => {
-  const store = isExplicitEventStore(eventStore) ? eventStore.store : createEventStore(eventStore);
+export const commandHandlerFactory = ({
+  eventStore
+}: ICommandHandlerFactoryOptions) => {
+  const store = isExplicitEventStore(eventStore)
+    ? eventStore.store
+    : createEventStore(eventStore);
 
   function getCommandHandler<T>(aggregate: IAggregate<T>) {
     const repository = createAggregateRepository<T>(aggregate, store);
 
-    const handleCommand = async (command: IApplicationCommand) => processCommand(aggregate, repository, command);
+    const handleCommand = async (command: IApplicationCommand) =>
+      processCommand(aggregate, repository, command);
 
-    return handleCommand
+    return handleCommand;
   }
 
-  return getCommandHandler
-}
+  return getCommandHandler;
+};

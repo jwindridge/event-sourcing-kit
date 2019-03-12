@@ -15,8 +15,13 @@ export interface IApplicationEvent extends IDomainEvent {
   version: number;
 }
 
-export function createEvent(aggregate: IAggregateId, version: number, name: string, data?: object, id?: string | number): IApplicationEvent {
-
+export function createEvent(
+  aggregate: IAggregateId,
+  version: number,
+  name: string,
+  data?: object,
+  id?: string | number
+): IApplicationEvent {
   const domainEvent = createDomainEvent(name, data);
 
   return {
@@ -24,5 +29,5 @@ export function createEvent(aggregate: IAggregateId, version: number, name: stri
     aggregate,
     version,
     id: id || uuid.v4()
-  }
+  };
 }

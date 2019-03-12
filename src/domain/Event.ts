@@ -7,5 +7,5 @@ export interface IDomainEvent {
 }
 
 export function createEvent(name: string, data?: object): IDomainEvent {
-  return { name, data }
+  return { name, data };
 }

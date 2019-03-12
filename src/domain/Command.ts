@@ -12,15 +12,18 @@ export interface IDomainCommand {
 
   // Hook to reject the command if it isn't valid
   reject: (reason: string) => void;
-
 }
 
-
-export function createCommand(name: string, reject: IRejectFunction, data?: object, user?: object): IDomainCommand {
+export function createCommand(
+  name: string,
+  reject: IRejectFunction,
+  data?: object,
+  user?: object
+): IDomainCommand {
   return {
     data,
     name,
     reject,
-    user,
-  }
-} 
+    user
+  };
+}
