@@ -43,7 +43,7 @@ export interface IAggregate<T> {
   applyCommand: (
     entity: IAggregateInstance<T>,
     command: IDomainCommand
-  ) => IDomainEvent | IDomainEvent[] | void;
+  ) => IDomainEvent[];
 }
 
 export function createAggregate<T>(
