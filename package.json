@@ -52,6 +52,7 @@
   },
   "dependencies": {
     "async-file": "^2.0.2",
+    "ninos": "^2.0.2",
     "rambda": "^2.4.1",
     "uuid": "^3.3.2"
   },
