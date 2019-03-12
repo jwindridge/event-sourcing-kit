@@ -2,7 +2,8 @@ export {
   IAggregate,
   IAggregateDefinition,
   ICommandHandlerMap,
-  IEventHandlerMap
+  IEventHandlerMap,
+  createAggregate
 } from './Aggregate';
 export { IDomainCommand } from './Command';
 export { IDomainEvent } from './Event';
