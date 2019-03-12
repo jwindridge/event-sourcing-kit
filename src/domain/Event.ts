@@ -5,3 +5,7 @@ export interface IDomainEvent {
   // Data associated with this event
   data?: any;
 }
+
+export function createEvent(name: string, data?: object): IDomainEvent {
+  return { name, data }
+}

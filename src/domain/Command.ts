@@ -1,3 +1,5 @@
+export type IRejectFunction = (reason: string) => void;
+
 export interface IDomainCommand {
   // Name of the command
   name: string;
@@ -11,5 +13,14 @@ export interface IDomainCommand {
   // Hook to reject the command if it isn't valid
   reject: (reason: string) => void;
 
-  // Expected version of the aggregate at the time the command was intitiated
 }
+
+
+export function createCommand(name: string, reject: IRejectFunction, data?: object, user?: object): IDomainCommand {
+  return {
+    data,
+    name,
+    reject,
+    user,
+  }
+} 

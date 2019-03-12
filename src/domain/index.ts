@@ -6,5 +6,5 @@ export {
   IEventHandlerMap,
   createAggregate
 } from './Aggregate';
-export { IDomainCommand } from './Command';
-export { IDomainEvent } from './Event';
+export { createCommand, IDomainCommand, IRejectFunction } from './Command';
+export { createEvent, IDomainEvent } from './Event';

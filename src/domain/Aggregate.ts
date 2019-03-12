@@ -7,11 +7,11 @@ export interface IAggregateInstance<T> {
   // Boolean value indicating whether this instance already exists or is not yet created
   exists: boolean;
 
-  // Publish domain events if commands pass business rules
-  publish: (type: string, data?: object) => void;
-
   // Current state of the aggregate
   state: T;
+
+  // Current version of the aggregate
+  version: number;
 }
 
 export interface IEventHandlerMap<T> {
@@ -19,7 +19,7 @@ export interface IEventHandlerMap<T> {
 }
 
 export interface ICommandHandlerMap<T> {
-  [s: string]: (entity: IAggregateInstance<T>, command: IDomainCommand) => void;
+  [s: string]: (entity: IAggregateInstance<T>, command: IDomainCommand) => IDomainEvent | IDomainEvent[] | void;
 }
 
 export interface IAggregateDefinition<T> {
@@ -43,7 +43,7 @@ export interface IAggregate<T> {
   applyCommand: (
     entity: IAggregateInstance<T>,
     command: IDomainCommand
-  ) => void;
+  ) => IDomainEvent | IDomainEvent[] | void;
 }
 
 export function createAggregate<T>(
@@ -61,7 +61,7 @@ export function createAggregate<T>(
     const updatedState =
       eventHandlers[name] && eventHandlers[name](entity.state, event);
 
-    return entity.update(updatedState);
+    return entity.update!(updatedState);
   };
 
   const initialEntity = makeVersionedEntity({
@@ -77,7 +77,12 @@ export function createAggregate<T>(
     command: IDomainCommand
   ) => {
     const { name } = command;
-    return commands[name] && commands[name](entity, command);
+    const events = commands[name] && commands[name](entity, command);
+
+    if (events !== undefined) {
+      return Array.isArray(events) ? events : [events]
+    }
+    return []
   };
 
   return {

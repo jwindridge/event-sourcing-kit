@@ -7,7 +7,7 @@ export interface IVersionedEntity<T> {
   // Current state of the entity
   state: T;
 
-  update: (state: T) => IVersionedEntity<T>;
+  update?: (state: T) => IVersionedEntity<T>;
 
   // Current version of the entity
   version: number;
