@@ -2,11 +2,13 @@
     "extends": ["tslint:latest", "tslint-config-prettier", "tslint-immutable"],
     "rules": {
       "interface-name": [true, "always-prefix"],
+      "max-classes-per-file": false,
       "no-console": false,
       // TODO: allow devDependencies only in **/*.spec.ts files:
       // waiting on https://github.com/palantir/tslint/pull/3708
       "no-implicit-dependencies": [true, "dev"],
       "object-literal-sort-keys": [true, "shorthand-first"],
-      "trailing-comma": [true, "always"]
+      "trailing-comma": [true, "always"],
+      "variable-name": [true, "allow-leading-underscore"]
     }
   }

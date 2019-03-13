@@ -52,10 +52,15 @@
   },
   "dependencies": {
     "@types/amqplib": "^0.5.11",
+    "@types/json-stable-stringify": "^1.0.32",
+    "@types/reflect-metadata": "^0.1.0",
     "amqplib": "^0.5.3",
     "async-file": "^2.0.2",
+    "inversify": "^5.0.1",
+    "json-stable-stringify": "^1.0.1",
     "ninos": "^2.0.2",
     "rambda": "^2.4.1",
+    "reflect-metadata": "^0.1.13",
     "servicebus": "^2.3.3",
     "uuid": "^3.3.2"
   },
@@ -82,6 +87,9 @@
     "failFast": true,
     "files": [
       "build/main/**/*.spec.js"
+    ],
+    "require": [
+      "reflect-metadata"
     ],
     "sources": [
       "build/main/**/*.js"

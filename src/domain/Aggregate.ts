@@ -2,6 +2,7 @@ import { IDomainCommand } from './Command';
 import { IDomainEvent } from './Event';
 
 import { IVersionedEntity, makeVersionedEntity } from './Entity';
+import { IServiceRegistry } from './Service';
 
 export interface IAggregateInstance<T> {
   // Boolean value indicating whether this instance already exists or is not yet created
@@ -18,11 +19,14 @@ export interface IEventHandlerMap<T> {
   [s: string]: (state: T, event: IDomainEvent) => T;
 }
 
+type CommandHandlerResult = IDomainEvent | IDomainEvent[] | void;
+
 export interface ICommandHandlerMap<T> {
   [s: string]: (
     entity: IAggregateInstance<T>,
-    command: IDomainCommand
-  ) => IDomainEvent | IDomainEvent[] | void;
+    command: IDomainCommand,
+    services?: IServiceRegistry
+  ) => CommandHandlerResult | Promise<CommandHandlerResult>;
 }
 
 export interface IAggregateDefinition<T> {
@@ -45,8 +49,9 @@ export interface IAggregate<T> {
   ) => IVersionedEntity<T>;
   applyCommand: (
     entity: IAggregateInstance<T>,
-    command: IDomainCommand
-  ) => IDomainEvent[];
+    command: IDomainCommand,
+    services: IServiceRegistry
+  ) => Promise<IDomainEvent[]>;
 }
 
 export function createAggregate<T>(
@@ -75,12 +80,15 @@ export function createAggregate<T>(
   const rehydrate = (events: IDomainEvent[], snapshot?: IVersionedEntity<T>) =>
     events.reduce(applyEvent, snapshot || initialEntity);
 
-  const applyCommand = (
+  const applyCommand = async (
     entity: IAggregateInstance<T>,
-    command: IDomainCommand
+    command: IDomainCommand,
+    services: IServiceRegistry
   ) => {
     const { name } = command;
-    const events = commands[name] && commands[name](entity, command);
+    const events = await Promise.resolve(
+      commands[name] && commands[name](entity, command, services)
+    );
 
     if (events !== undefined) {
       return Array.isArray(events) ? events : [events];

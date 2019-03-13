@@ -37,21 +37,20 @@ declare interface IMiddleware {
   handleIncoming?: IMiddlewareFunction;
   handleOutgoing?: IMiddlewareFunction;
 }
-
-interface IBus {
-  send: IPublisher;
-  listen: IListener;
-
-  publish: IPublisher;
-  subscribe: IListener;
-
-  use: (middleware: IMiddleware) => void;
-
-  close: () => void;
-}
-
 declare module 'servicebus' {
   import { Options } from 'amqplib';
+
+  export interface IBus {
+    send: IPublisher;
+    listen: IListener;
+
+    publish: IPublisher;
+    subscribe: IListener;
+
+    use: (middleware: IMiddleware) => void;
+
+    close: () => void;
+  }
 
   export function bus(opts?: IBusOptions, implOpts?: Options.Connect): IBus;
   export function namedBus(

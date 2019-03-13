@@ -8,3 +8,4 @@ export {
 } from './Aggregate';
 export { createCommand, IDomainCommand, IRejectFunction } from './Command';
 export { createEvent, IDomainEvent } from './Event';
+export { IDomainService, IServiceRegistry } from './Service';

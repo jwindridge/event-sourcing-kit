@@ -1,12 +1,11 @@
-
 {
-    "extends": "./tsconfig",
-    "compilerOptions": {
-      "target": "esnext",
-      "outDir": "build/module",
-      "module": "esnext"
-    },
-    "exclude": [
-      "node_modules/**"
-    ]
-  }
+  "extends": "./tsconfig",
+  "compilerOptions": {
+    "target": "esnext",
+    "outDir": "build/module",
+    "module": "esnext",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true
+  },
+  "exclude": ["node_modules/**"]
+}
