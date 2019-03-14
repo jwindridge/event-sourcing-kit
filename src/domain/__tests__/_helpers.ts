@@ -24,7 +24,9 @@ const definition: IAggregateDefinition<ICounter> = {
         data: { by },
         name: 'incremented'
       }));
-    }
+    },
+    /* tslint:disable-next-line no-empty */
+    noop(_, __) {}
   },
   eventHandlers: {
     incremented(state, event) {
