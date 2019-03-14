@@ -1,58 +1,13 @@
-import { IDomainCommand } from './Command';
-import { IDomainEvent } from './Event';
-
-import { IVersionedEntity, makeVersionedEntity } from './Entity';
-import { IServiceRegistry } from './Service';
-
-export interface IAggregateInstance<T> {
-  // Boolean value indicating whether this instance already exists or is not yet created
-  exists: boolean;
-
-  // Current state of the aggregate
-  state: T;
-
-  // Current version of the aggregate
-  version: number;
-}
-
-export interface IEventHandlerMap<T> {
-  [s: string]: (state: T, event: IDomainEvent) => T;
-}
-
-type CommandHandlerResult = IDomainEvent | IDomainEvent[] | void;
-
-export interface ICommandHandlerMap<T> {
-  [s: string]: (
-    entity: IAggregateInstance<T>,
-    command: IDomainCommand,
-    services?: IServiceRegistry
-  ) => CommandHandlerResult | Promise<CommandHandlerResult>;
-}
-
-export interface IAggregateDefinition<T> {
-  name: string;
-
-  initialState: T;
-
-  getNextId?: () => string;
-
-  eventHandlers: IEventHandlerMap<T>;
-
-  commands: ICommandHandlerMap<T>;
-}
-
-export interface IAggregate<T> {
-  readonly name: string;
-  rehydrate: (
-    events: IDomainEvent[],
-    snapshot?: IVersionedEntity<T>
-  ) => IVersionedEntity<T>;
-  applyCommand: (
-    entity: IAggregateInstance<T>,
-    command: IDomainCommand,
-    services: IServiceRegistry
-  ) => Promise<IDomainEvent[]>;
-}
+import { makeVersionedEntity } from './Entity';
+import {
+  IAggregate,
+  IAggregateDefinition,
+  IAggregateInstance,
+  IDomainCommand,
+  IDomainEvent,
+  IServiceRegistry,
+  IVersionedEntity
+} from './interfaces';
 
 export function createAggregate<T>(
   definition: IAggregateDefinition<T>
@@ -90,10 +45,11 @@ export function createAggregate<T>(
       commands[name] && commands[name](entity, command, services)
     );
 
-    if (events !== undefined) {
-      return Array.isArray(events) ? events : [events];
+    if (Array.isArray(events)) {
+      return events;
+    } else {
+      return !!events ? [events] : [];
     }
-    return [];
   };
 
   return {

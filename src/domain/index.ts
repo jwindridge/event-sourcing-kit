@@ -1,11 +1,5 @@
-export {
-  IAggregate,
-  IAggregateDefinition,
-  IAggregateInstance,
-  ICommandHandlerMap,
-  IEventHandlerMap,
-  createAggregate
-} from './Aggregate';
-export { createCommand, IDomainCommand, IRejectFunction } from './Command';
-export { createEvent, IDomainEvent } from './Event';
-export { IDomainService, IServiceRegistry } from './Service';
+export * from './interfaces';
+
+export { createAggregate } from './Aggregate';
+export { createCommand } from './Command';
+export { createEvent } from './Event';
