@@ -55,6 +55,7 @@ export function createAggregate<T>(
   return {
     applyCommand,
     rehydrate,
+    commands: Object.keys(commands),
     name: aggregateName
   };
 }
