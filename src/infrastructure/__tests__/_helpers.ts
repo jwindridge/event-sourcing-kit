@@ -1,9 +1,13 @@
-import test from 'ava';
+import aTest, { TestInterface } from 'ava';
 import { Container } from 'inversify';
 
 import { createAggregate, IAggregateDefinition } from '../../domain';
 
-import { IAggregateRepositoryFactory, IEventStore } from '../interfaces';
+import {
+  IAggregateRepository,
+  IAggregateRepositoryFactory,
+  IEventStore
+} from '../interfaces';
 
 import { TYPES } from '../constants';
 import { EventStore } from '../EventStore';
@@ -41,11 +45,21 @@ const counterDefinition: IAggregateDefinition<ICounter> = {
 /* tslint:disable-next-line variable-name */
 export const Counter = createAggregate<ICounter>(counterDefinition);
 
-test.beforeEach((t: any) => {
+export const test = aTest as TestInterface<{
+  eventStore: IEventStore;
+  factory: IAggregateRepositoryFactory;
+  repository: IAggregateRepository<ICounter>;
+  store: IAppendOnlyStore;
+}>;
+
+test.beforeEach(t => {
   const container = new Container({ skipBaseClassChecks: true });
+
+  const store = new InMemoryStore();
+
   container
     .bind<IAppendOnlyStore>(TYPES.storage.AppendOnlyStore)
-    .toConstantValue(new InMemoryStore());
+    .toConstantValue(store);
   container.bind<IEventStore>(TYPES.EventStore).to(EventStore);
   container
     .bind<IAggregateRepositoryFactory>(TYPES.AggregateRepositoryFactory)
@@ -55,8 +69,8 @@ test.beforeEach((t: any) => {
     TYPES.AggregateRepositoryFactory
   );
 
-  const store = container.get<IEventStore>(TYPES.EventStore);
-  const repository = new AggregateRepository(Counter, store);
+  const eventStore = container.get<IEventStore>(TYPES.EventStore);
+  const repository = new AggregateRepository(Counter, eventStore);
 
-  t.context = { ...t.context, factory, repository };
+  t.context = { ...t.context, eventStore, factory, repository, store };
 });

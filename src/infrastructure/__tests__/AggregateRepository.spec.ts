@@ -1,7 +1,6 @@
-import test from 'ava';
-import { Counter } from './_helpers';
+import { Counter, test } from './_helpers';
 
-test('AggregateRepository: save & retrieve', async (t: any) => {
+test('AggregateRepository: save & retrieve', async t => {
   const { repository } = t.context;
 
   const counterId = 'counter1';
