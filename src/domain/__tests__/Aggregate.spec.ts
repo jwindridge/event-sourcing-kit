@@ -1,5 +1,3 @@
-import atest, { TestInterface } from 'ava';
-
 import './_helpers';
 
 import { createCommand } from '../Command';

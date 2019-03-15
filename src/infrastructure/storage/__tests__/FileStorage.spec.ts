@@ -9,8 +9,8 @@ import { TYPES } from '../constants';
 import { FileStore, FileStoreConfig, IFileStoreConfig } from '../FileStorage';
 import { IAppendOnlyStore } from '../interfaces';
 
-import { ITestStreamData, test as baseTest } from './_helpers';
 import { AppendOnlyStoreConcurrencyError } from '../errors';
+import { ITestStreamData, test as baseTest } from './_helpers';
 
 interface IFileStorageTest {
   TEST_FILE_PATH: string;
