@@ -26,6 +26,7 @@ export class InMemoryStore implements IAppendOnlyStore {
 
     const stream = this._streamsById[streamId] || [];
     this._streamsById[streamId] = [...stream, ...records];
+    this._allData = [...this._allData, ...records];
   }
 
   public async readRecords(streamId: string, after?: number, limit?: number) {
