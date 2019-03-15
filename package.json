@@ -1,5 +1,5 @@
 {
-  "name": "@authentik8/event-sourcing-kit",
+  "name": "eskit",
   "version": "0.2.0",
   "description": "Libary for simplifying development of event-sourced applications",
   "main": "build/main/index.js",
