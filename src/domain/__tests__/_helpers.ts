@@ -1,12 +1,25 @@
 /* tslint:disable-next-line no-var-requires */
-const test = require('ninos')(require('ava'));
+const aTest = require('ninos')(require('ava'));
+import { TestInterface } from 'ava';
 
 import { createAggregate } from '../Aggregate';
-import { IAggregateDefinition } from '../interfaces';
+import {
+  IAggregate,
+  IAggregateDefinition,
+  IRejectFunction
+} from '../interfaces';
 
 const initialState = {
   value: 0
 };
+
+export const test = aTest as TestInterface<{
+  aggregate: IAggregate<ICounter>;
+  definition: IAggregateDefinition<ICounter>;
+  initialState: ICounter;
+  reject: IRejectFunction;
+  stub: () => any;
+}>;
 
 const definition: IAggregateDefinition<ICounter> = {
   initialState,
@@ -38,7 +51,7 @@ const definition: IAggregateDefinition<ICounter> = {
 
 export const aggregate = createAggregate<ICounter>(definition);
 
-test.beforeEach((t: any) => {
+test.beforeEach(t => {
   t.context = {
     ...t.context,
     aggregate,
