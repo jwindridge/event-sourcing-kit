@@ -79,6 +79,7 @@ export interface IAggregateDefinition<T> {
 
 export interface IAggregate<T> {
   readonly name: string;
+  readonly commands: string[];
   rehydrate: (
     events: IDomainEvent[],
     snapshot?: IVersionedEntity<T>

@@ -5,12 +5,19 @@ import './_helpers';
 import { createCommand } from '../Command';
 import { makeVersionedEntity } from '../Entity';
 import { createEvent } from '../Event';
-import { IAggregate } from '../interfaces';
 
 /* tslint:disable-next-line no-duplicate-imports */
-import { ICounter } from './_helpers';
+import { test } from './_helpers';
 
-const test = atest as TestInterface<{ aggregate: IAggregate<ICounter> }>;
+test('name', t => {
+  const { aggregate, definition } = t.context;
+  t.is(aggregate.name, definition.name);
+});
+
+test('commands', t => {
+  const { aggregate } = t.context;
+  t.deepEqual(aggregate.commands, ['increment', 'incrementMultiple', 'noop']);
+});
 
 test('rehydrate', t => {
   const { aggregate } = t.context;
