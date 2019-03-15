@@ -1,7 +1,7 @@
 /* tslint:disable-next-line no-var-requires */
 const test = require('ninos')(require('ava'));
 
-import { createCommand } from './Command';
+import { createCommand } from '../Command';
 
 test('createCommand', (t: any) => {
   const reject = t.context.stub();

@@ -1,4 +1,5 @@
-import test from 'ava';
+import fs from 'async-file';
+import { TestInterface } from 'ava';
 import path from 'path';
 import uuid from 'uuid';
 
@@ -8,7 +9,19 @@ import { TYPES } from '../constants';
 import { FileStore, FileStoreConfig, IFileStoreConfig } from '../FileStorage';
 import { IAppendOnlyStore } from '../interfaces';
 
-test.beforeEach((t: any) => {
+import { ITestStreamData, test as baseTest } from './_helpers';
+import { AppendOnlyStoreConcurrencyError } from '../errors';
+
+interface IFileStorageTest {
+  TEST_FILE_PATH: string;
+  config: IFileStoreConfig;
+  store: IAppendOnlyStore;
+  streams: ITestStreamData[];
+}
+
+const test = baseTest as TestInterface<IFileStorageTest>;
+
+test.beforeEach(t => {
   const name = t.title.replace(/[|&;$%@"<>()+, \:]/g, '-');
 
   const testFileName = `EventLog-${name}-${uuid.v4().slice(0, 8)}.log`;
@@ -20,24 +33,104 @@ test.beforeEach((t: any) => {
   t.context.store = new FileStore(config);
 });
 
-test('append: string id', async (t: any) => {
-  const { store } = t.context;
-
-  const data = [{ foo: 1 }, { bar: 2 }];
-
-  const stream = 'dummyStream';
-
-  await store.append(stream, data, 0);
-
-  const stored = await store.readRecords(stream);
-
-  t.deepEqual(stored, [
-    { id: 1, streamId: stream, version: 1, data: { foo: 1 } },
-    { id: 2, streamId: stream, version: 2, data: { bar: 2 } }
-  ]);
+test.afterEach.always(async t => {
+  const filePath = t.context.TEST_FILE_PATH;
+  await new Promise(resolve => {
+    setTimeout(() => {
+      fs.unlink(filePath);
+      resolve();
+    }, 50);
+  });
 });
 
-test('injection', async (t: any) => {
+const saveRecords = async (
+  store: IAppendOnlyStore,
+  streams: ITestStreamData[]
+) => {
+  for (const { id, data } of streams) {
+    await store.append(id, data, 0);
+  }
+};
+
+test('append & retrieve', async t => {
+  const { store, streams } = t.context;
+
+  const { id, data, expectedResult } = streams.find(s => s.id === 'stream1')!;
+
+  await store.append(id, data.slice(0, 1), 0);
+  await store.append(id, data.slice(1), 1);
+
+  const stored = await store.readRecords(id);
+
+  t.deepEqual(stored, expectedResult(0));
+});
+
+test('throws concurrency error', async t => {
+  const { store, streams } = t.context;
+
+  const { id, data } = streams.find(s => s.id === 'stream1')!;
+
+  await store.append(id, data.slice(0, 1), 0);
+  const shouldError = async () => store.append(id, data.slice(1), 0);
+
+  await t.throwsAsync(shouldError, {
+    instanceOf: AppendOnlyStoreConcurrencyError,
+    message: `Expected stream "${id}" to be at version 0, got 1`
+  });
+});
+
+test('retrieve after version', async t => {
+  const { store, streams } = t.context;
+  await saveRecords(store, streams);
+  const { id, expectedResult } = streams.find(s => s.id === 'longStream')!;
+
+  const results = expectedResult(0);
+
+  const storedAfter30 = await store.readRecords(id, 30);
+  t.is(storedAfter30.length, results.length - 30);
+  t.deepEqual(storedAfter30, results.slice(30));
+});
+
+test('retrieve segment', async t => {
+  const { store, streams } = t.context;
+  await saveRecords(store, streams);
+  const { id, expectedResult } = streams.find(s => s.id === 'longStream')!;
+
+  const results = expectedResult(0);
+
+  const storedBetween20And45 = await store.readRecords(id, 20, 25);
+  t.is(storedBetween20And45.length, 25);
+  t.deepEqual(storedBetween20And45, results.slice(20).slice(0, 25));
+});
+
+test('retrieve all', async t => {
+  const { store, streams } = t.context;
+  await saveRecords(store, streams.slice(1));
+  const allData = await store.readAllRecords();
+  t.is(
+    allData.length,
+    streams.slice(1).reduce((acc, s) => acc + s.data.length, 0)
+  );
+});
+
+test('retrieve all after', async t => {
+  const { store, streams } = t.context;
+  await saveRecords(store, streams);
+  const allData = await store.readAllRecords(30);
+  t.is(allData.length, streams.reduce((acc, s) => acc + s.data.length, -30));
+});
+
+test('retrieve all segment', async t => {
+  const { store, streams } = t.context;
+  await saveRecords(store, streams);
+  const allData = await store.readAllRecords(35, 20);
+  t.is(
+    allData.length,
+    Math.min(streams.reduce((acc, s) => acc + s.data.length, -35), 20)
+  );
+});
+
+test('injection', async t => {
   const container = new Container();
   container
     .bind<IFileStoreConfig>(TYPES.FileStoreConfig)
@@ -55,16 +148,21 @@ test('injection', async (t: any) => {
   ]);
 });
 
-test('id recovery', async (t: any) => {
-  const { config, store } = t.context;
-  const streamId = 'stream1';
-  const d1 = { x: 1 };
-  await store.append(streamId, [d1], 0);
+test('id recovery', async t => {
+  const { config, store, streams } = t.context;
+
+  const { id: stream1Id, data: stream1Data } = streams.find(
+    s => s.id === 'stream1'
+  )!;
+  const { id: stream2Id, data: stream2Data, expectedResult } = streams.find(
+    s => s.id === 'stream2'
+  )!;
+
+  await store.append(stream1Id, stream1Data, 0);
 
   const secondStore = new FileStore(config);
-  const d2 = { y: 2 };
-  await secondStore.append('stream2', [d2], 0);
+  await secondStore.append(stream2Id, stream2Data, 0);
 
-  const values = await store.readRecords('stream2');
-  t.deepEqual(values, [{ id: 2, streamId: 'stream2', version: 1, data: d2 }]);
+  const values = await store.readRecords(stream2Id);
+  t.deepEqual(values, expectedResult(stream1Data.length));
 });
