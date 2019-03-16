@@ -1,7 +1,7 @@
 import { Counter, test } from './_helpers';
 
 test('AggregateRepository: save & retrieve', async t => {
-  const { repository } = t.context;
+  const { domainServiceRegistry, repository } = t.context;
 
   const counterId = 'counter1';
 
@@ -9,7 +9,7 @@ test('AggregateRepository: save & retrieve', async t => {
   const events = await Counter.applyCommand(
     counterState,
     { name: 'increment', data: { by: 2 }, reject: () => 'rejected' },
-    {}
+    domainServiceRegistry
   );
   await repository.save(counterId, events, 0);
 

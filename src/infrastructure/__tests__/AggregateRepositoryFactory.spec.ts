@@ -1,8 +1,7 @@
-import test from 'ava';
-import { Counter } from './_helpers';
+import { Counter, test } from './_helpers';
 
 test('AggregateRepositoryFactory', async (t: any) => {
-  const { factory, repository } = t.context;
+  const { domainServiceRegistry, factory, repository } = t.context;
   const factoryRepository = factory.createRepository(Counter);
 
   const counterId = 'counter';
@@ -14,7 +13,11 @@ test('AggregateRepositoryFactory', async (t: any) => {
     reject: () => 'rejected'
   };
 
-  const events = await Counter.applyCommand(directRepositoryState, command, {});
+  const events = await Counter.applyCommand(
+    directRepositoryState,
+    command,
+    domainServiceRegistry
+  );
   await repository.save(counterId, events, 0);
 
   directRepositoryState = await repository.getById(counterId);

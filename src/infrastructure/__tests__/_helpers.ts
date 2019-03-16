@@ -1,7 +1,11 @@
 import aTest, { TestInterface } from 'ava';
 import { Container } from 'inversify';
 
-import { createAggregate, IAggregateDefinition } from '../../domain';
+import {
+  createAggregate,
+  IAggregateDefinition,
+  IServiceRegistry
+} from '../../domain';
 
 import {
   IAggregateRepository,
@@ -46,6 +50,7 @@ const counterDefinition: IAggregateDefinition<ICounter> = {
 export const Counter = createAggregate<ICounter>(counterDefinition);
 
 export const test = aTest as TestInterface<{
+  domainServiceRegistry: IServiceRegistry;
   eventStore: IEventStore;
   factory: IAggregateRepositoryFactory;
   repository: IAggregateRepository<ICounter>;
@@ -72,5 +77,14 @@ test.beforeEach(t => {
   const eventStore = container.get<IEventStore>(TYPES.EventStore);
   const repository = new AggregateRepository(Counter, eventStore);
 
-  t.context = { ...t.context, eventStore, factory, repository, store };
+  const domainServiceRegistry = new Container();
+
+  t.context = {
+    ...t.context,
+    domainServiceRegistry,
+    eventStore,
+    factory,
+    repository,
+    store
+  };
 });

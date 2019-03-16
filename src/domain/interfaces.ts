@@ -27,7 +27,7 @@ export interface IDomainService {
 }
 
 export interface IServiceRegistry {
-  [s: string]: IDomainService;
+  get<T>(identifier: string | symbol): T;
 }
 
 export interface IVersionedEntity<T> {
