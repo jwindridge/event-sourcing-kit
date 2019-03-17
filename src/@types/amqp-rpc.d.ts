@@ -269,7 +269,7 @@ declare module '@elastic.io/amqp-rpc' {
      * @param {String} params.requestsQueue queue when AMQPRPC client sends commands, should correspond with AMQPRPCClient
      *    default is '' which means auto-generated queue name
      */
-    constructor(connection: Connection, params: IAMQPServerOpts);
+    constructor(connection: Connection, params?: IAMQPServerOpts);
 
     /**
      * Initialize RPC server.
