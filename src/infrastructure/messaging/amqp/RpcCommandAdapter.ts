@@ -11,20 +11,20 @@ interface IRpcCommandAdapterParams {
 }
 
 @injectable()
-class RpcCommandAdapter<T> {
+class RpcCommandAdapter {
   private _url: string;
-  private _service?: IAggregateCommandService<T>;
+  private _service?: IAggregateCommandService<any>;
   private _rpcServer?: AMQPRPCServer;
 
   constructor(config: IRpcCommandAdapterParams) {
     this._url = config.url;
   }
 
-  public bind(service: IAggregateCommandService<T>): void {
+  public bind(service: IAggregateCommandService<any>): void {
     this._service = service;
   }
 
-  public async start() {
+  public async start(): Promise<void> {
     const connection = await connect(this._url);
 
     const service = this._service!;
