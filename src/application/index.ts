@@ -1,3 +1,3 @@
 export * from './interfaces';
 
-export { createCommand, IApplicationCommand } from './Command';
+export { createCommand } from './Command';

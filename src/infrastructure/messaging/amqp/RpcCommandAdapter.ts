@@ -2,8 +2,8 @@ import { AMQPRPCServer, Command } from '@elastic.io/amqp-rpc';
 import { connect } from 'amqplib';
 import { injectable } from 'inversify';
 import {
-  IApplicationCommand,
-  IAggregateCommandService
+  IAggregateCommandService,
+  IApplicationCommand
 } from '../../../application';
 
 interface IRpcCommandAdapterParams {
@@ -40,6 +40,8 @@ class RpcCommandAdapter<T> {
         return service.handle(commandData as IApplicationCommand);
       });
     }
+
+    this._rpcServer.start();
   }
 }
 

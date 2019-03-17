@@ -145,6 +145,9 @@ declare module '@elastic.io/amqp-rpc' {
      */
     public static fromBuffer(buffer: Buffer): Command;
 
+    public command: string;
+    public args: any[];
+
     /**
      * Creates a new command instance.
      *
