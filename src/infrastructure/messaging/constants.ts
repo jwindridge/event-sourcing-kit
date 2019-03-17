@@ -1,4 +1,6 @@
+import { TYPES as AMQP_TYPES } from './amqp';
+
 export const TYPES = {
-  EventDispatcher: Symbol('EventDispatcher'),
-  Servicebus: Symbol('Servicebus')
+  AMQP: { AMQP_TYPES },
+  EventDispatcher: Symbol('EventDispatcher')
 };
