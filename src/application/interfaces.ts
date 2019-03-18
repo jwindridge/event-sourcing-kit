@@ -27,7 +27,20 @@ export interface IApplicationEvent extends IDomainEvent {
   version: number;
 }
 
+export interface ICommandSuccessResult {
+  success: boolean;
+  value: any;
+}
+
+export interface ICommandErrorResult {
+  code: string;
+  message: string;
+  success: boolean;
+}
+
+export type ICommandResult = ICommandSuccessResult | ICommandErrorResult;
+
 export interface IAggregateCommandService<T> {
   aggregate: IAggregate<T>;
-  handle: (command: IApplicationCommand) => Promise<void>;
+  handle: (command: IApplicationCommand) => Promise<ICommandResult>;
 }
