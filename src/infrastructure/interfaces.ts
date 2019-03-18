@@ -19,6 +19,7 @@ export interface IEventStore extends EventEmitter {
 
 export interface IAggregateRepository<T> {
   getById(id: string): Promise<IAggregateInstance<T>>;
+  getNextId(): Promise<string>;
   save(
     id: string,
     events: IDomainEvent[],
@@ -28,4 +29,8 @@ export interface IAggregateRepository<T> {
 
 export interface IAggregateRepositoryFactory {
   createRepository<T>(aggregate: IAggregate<T>): IAggregateRepository<T>;
+}
+
+export interface ICommandAdapter {
+  start(): Promise<void>;
 }

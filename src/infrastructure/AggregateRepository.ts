@@ -1,4 +1,5 @@
 import { inject, injectable } from 'inversify';
+import uuid from 'uuid';
 
 import { IAggregateId, IApplicationEvent } from '../application';
 import { IAggregate, IAggregateInstance, IDomainEvent } from '../domain';
@@ -32,6 +33,10 @@ export class AggregateRepository<T> implements IAggregateRepository<T> {
     const aggregateId = this._getAggregateId(id);
     const events = await this._store.loadEvents(aggregateId);
     return this._createInstance(events);
+  }
+
+  public async getNextId(): Promise<string> {
+    return Promise.resolve(uuid.v4());
   }
 
   private _getAggregateId(id: string): IAggregateId {
