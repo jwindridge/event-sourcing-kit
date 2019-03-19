@@ -1,6 +1,7 @@
 import aTest, { TestInterface } from 'ava';
 import { Container } from 'inversify';
 
+import { IApplicationEvent } from '../../application';
 import {
   createAggregate,
   IAggregateDefinition,
@@ -19,6 +20,7 @@ import { IAppendOnlyStore, InMemoryStore } from '../storage';
 
 import { AggregateRepository } from '../AggregateRepository';
 import { AggregateRepositoryFactory } from '../AggregateRepositoryFactory';
+import { IEventPublisher } from '../messaging';
 
 export interface ICounter {
   value: number;
@@ -52,7 +54,9 @@ export const Counter = createAggregate<ICounter>(counterDefinition);
 export const test = aTest as TestInterface<{
   domainServiceRegistry: IServiceRegistry;
   eventStore: IEventStore;
+  eventPublisher: IEventPublisher;
   factory: IAggregateRepositoryFactory;
+  publishedEvents: IApplicationEvent[];
   repository: IAggregateRepository<ICounter>;
   store: IAppendOnlyStore;
 }>;
@@ -62,9 +66,23 @@ test.beforeEach(t => {
 
   const store = new InMemoryStore();
 
+  const publishedEvents: IApplicationEvent[] = [];
+
+  const eventPublisher = {
+    publish: (event: IApplicationEvent) => {
+      publishedEvents.push(event);
+      return Promise.resolve();
+    }
+  };
+
   container
     .bind<IAppendOnlyStore>(TYPES.storage.AppendOnlyStore)
     .toConstantValue(store);
+
+  container
+    .bind<IEventPublisher>(TYPES.messaging.EventPublisher)
+    .toConstantValue(eventPublisher);
+
   container.bind<IEventStore>(TYPES.EventStore).to(EventStore);
   container
     .bind<IAggregateRepositoryFactory>(TYPES.AggregateRepositoryFactory)
@@ -82,8 +100,10 @@ test.beforeEach(t => {
   t.context = {
     ...t.context,
     domainServiceRegistry,
+    eventPublisher,
     eventStore,
     factory,
+    publishedEvents,
     repository,
     store
   };

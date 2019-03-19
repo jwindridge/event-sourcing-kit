@@ -6,11 +6,14 @@ import { IAggregateId, IApplicationEvent } from '../application';
 import { IDomainEvent } from '../domain';
 
 import { IEventStore } from './interfaces';
+import { IEventPublisher, TYPES as MESSAGING_TYPES } from './messaging';
 import {
   IAppendOnlyStore,
   IStreamData,
   TYPES as STORAGE_TYPES
 } from './storage';
+
+export const EVENT_STORED = Symbol('EventStored');
 
 interface IStoredEvent extends IStreamData {
   data: IDomainEvent;
@@ -20,9 +23,15 @@ interface IStoredEvent extends IStreamData {
 export class EventStore extends EventEmitter implements IEventStore {
   private readonly _storage: IAppendOnlyStore;
 
-  constructor(@inject(STORAGE_TYPES.AppendOnlyStore) store: IAppendOnlyStore) {
+  constructor(
+    @inject(STORAGE_TYPES.AppendOnlyStore) store: IAppendOnlyStore,
+    @inject(MESSAGING_TYPES.EventPublisher) publisher?: IEventPublisher
+  ) {
     super();
     this._storage = store;
+    if (publisher !== undefined) {
+      this.addListener(EVENT_STORED, publisher.publish);
+    }
   }
 
   public async save(
@@ -31,7 +40,14 @@ export class EventStore extends EventEmitter implements IEventStore {
     expectedVersion: number
   ) {
     const streamId = this.getStreamId(agggregateId);
-    return this._storage.append(streamId, events, expectedVersion);
+    const storedEvents = await this._storage.append(
+      streamId,
+      events,
+      expectedVersion
+    );
+    for (const event of storedEvents.map(this._convertToEvent)) {
+      this.emit(EVENT_STORED, event);
+    }
   }
 
   public async loadEvents(

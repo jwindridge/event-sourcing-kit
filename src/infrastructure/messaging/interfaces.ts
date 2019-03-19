@@ -1,5 +1,5 @@
 import { IApplicationEvent } from '../../application';
 
-export interface IEventDispatcher {
-  dispatch(event: IApplicationEvent): Promise<void>;
+export interface IEventPublisher {
+  publish(event: IApplicationEvent): Promise<void>;
 }

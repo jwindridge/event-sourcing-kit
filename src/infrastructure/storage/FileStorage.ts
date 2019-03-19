@@ -52,6 +52,8 @@ export class FileStore implements IAppendOnlyStore {
       encoding: 'utf8',
       flag: 'a+'
     });
+
+    return records;
   }
 
   public async readAllRecords(skip?: number, limit?: number) {

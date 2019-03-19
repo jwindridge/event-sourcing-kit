@@ -3,7 +3,7 @@ import { test } from './_helpers';
 import { createEvent } from '../../domain';
 
 test('save', async t => {
-  const { eventStore, store } = t.context;
+  const { eventStore, publishedEvents, store } = t.context;
 
   const events = [createEvent('incremented', { by: 2 })];
 
@@ -12,8 +12,10 @@ test('save', async t => {
   await eventStore.save(aggregateId, events, 0);
 
   const storedData = await store.readAllRecords();
+  const savedEvents = await eventStore.loadAllEvents();
 
   t.is(storedData.length, 1);
+  t.deepEqual(publishedEvents, savedEvents);
 });
 
 test('loadEvents', async t => {

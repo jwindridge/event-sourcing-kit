@@ -56,6 +56,7 @@
     "async-file": "^2.0.2",
     "inversify": "^5.0.1",
     "json-stable-stringify": "^1.0.1",
+    "knex": "^0.16.3",
     "ninos": "^2.0.2",
     "rambda": "^2.4.1",
     "reflect-metadata": "^0.1.13",
@@ -65,6 +66,7 @@
   "devDependencies": {
     "@types/amqplib": "^0.5.11",
     "@types/json-stable-stringify": "^1.0.32",
+    "@types/knex": "^0.15.2",
     "@types/node": "^11.10.5",
     "@types/reflect-metadata": "^0.1.0",
     "@types/uuid": "^3.4.4",
