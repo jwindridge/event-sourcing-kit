@@ -13,8 +13,6 @@ import {
   TYPES as STORAGE_TYPES
 } from './storage';
 
-export const EVENT_STORED = Symbol('EventStored');
-
 interface IStoredEvent extends IStreamData {
   data: IDomainEvent;
 }
@@ -30,7 +28,7 @@ export class EventStore extends EventEmitter implements IEventStore {
     super();
     this._storage = store;
     if (publisher !== undefined) {
-      this.addListener(EVENT_STORED, publisher.publish);
+      this.addListener('saved', publisher.publish);
     }
   }
 
@@ -46,7 +44,7 @@ export class EventStore extends EventEmitter implements IEventStore {
       expectedVersion
     );
     for (const event of storedEvents.map(this._convertToEvent)) {
-      this.emit(EVENT_STORED, event);
+      this.emit('saved', event);
     }
   }
 
