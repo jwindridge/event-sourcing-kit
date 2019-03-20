@@ -1,4 +1,5 @@
 export const TYPES = {
   DatabaseProjectionProvider: Symbol('DatabaseProjectionProvider'),
-  ProjectionDatabase: Symbol('ProjectionDatabase')
+  KnexClient: Symbol('KnexClient'),
+  ProjectionDatabaseConfig: Symbol('ProjectionDatabaseConfig')
 };
