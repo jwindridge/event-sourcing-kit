@@ -68,20 +68,9 @@ test.beforeEach(t => {
 
   const publishedEvents: IApplicationEvent[] = [];
 
-  const eventPublisher = {
-    publish: (event: IApplicationEvent) => {
-      publishedEvents.push(event);
-      return Promise.resolve();
-    }
-  };
-
   container
     .bind<IAppendOnlyStore>(TYPES.storage.AppendOnlyStore)
     .toConstantValue(store);
-
-  container
-    .bind<IEventPublisher>(TYPES.messaging.EventPublisher)
-    .toConstantValue(eventPublisher);
 
   container.bind<IEventStore>(TYPES.EventStore).to(EventStore);
   container
@@ -93,6 +82,13 @@ test.beforeEach(t => {
   );
 
   const eventStore = container.get<IEventStore>(TYPES.EventStore);
+
+  const storeSavedEvent = (event: IApplicationEvent) => {
+    publishedEvents.push(event);
+    return Promise.resolve();
+  };
+  eventStore.on('saved', storeSavedEvent);
+
   const repository = new AggregateRepository(Counter, eventStore);
 
   const domainServiceRegistry = new Container();
@@ -100,7 +96,6 @@ test.beforeEach(t => {
   t.context = {
     ...t.context,
     domainServiceRegistry,
-    eventPublisher,
     eventStore,
     factory,
     publishedEvents,
