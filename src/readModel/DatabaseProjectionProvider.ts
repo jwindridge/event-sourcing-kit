@@ -11,9 +11,9 @@ import {
   IColumnDefinition,
   IDatabaseProjection,
   IDatabaseProjectionFactory,
+  IDatabaseProjectionProvider,
   IProjectionDefinition,
-  ITableDefinition,
-  IDatabaseProjectionProvider
+  ITableDefinition
 } from './interfaces';
 
 const getDefinition = (c: ColumnType | IColumnDefinition) =>
@@ -91,7 +91,11 @@ const ensureTable = async (
   db: Knex,
   table: ITableDefinition
 ): Promise<QueryInterface> => {
-  await db.schema.createTableIfNotExists(table.name, buildTable(table));
+  const exists = await db.schema.hasTable(table.name);
+
+  if (!exists) {
+    await db.schema.createTable(table.name, buildTable(table));
+  }
   return db(table.name);
 };
 
