@@ -66,7 +66,6 @@
   "devDependencies": {
     "@types/amqplib": "^0.5.11",
     "@types/json-stable-stringify": "^1.0.32",
-    "@types/knex": "^0.15.2",
     "@types/node": "^11.10.5",
     "@types/reflect-metadata": "^0.1.0",
     "@types/uuid": "^3.4.4",
@@ -85,6 +84,10 @@
     "tslint-immutable": "^5.0.0",
     "typedoc": "^0.13.0",
     "typescript": "^3.1.6"
+  },
+  "optionalDependencies": {
+    "pg": "^7.9.0",
+    "pg-native": "^3.0.0"
   },
   "ava": {
     "failFast": true,

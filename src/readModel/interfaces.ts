@@ -58,14 +58,12 @@ export interface IProjection {
   apply(event: IApplicationEvent): Promise<void>;
 }
 
-export interface IDatabaseProjection extends IProjection {
-  collection: QueryInterface;
+export interface IDatabaseProjection {
   definition: IProjectionDefinition;
-  start(): Promise<void>;
+  start(collection: QueryInterface): Promise<void>;
 }
 
 export type IDatabaseProjectionFactory = (
-  db: QueryInterface,
   eventSource: IEventSubscriber
 ) => IDatabaseProjection;
 

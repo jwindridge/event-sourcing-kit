@@ -1,5 +1,5 @@
 import { inject, injectable } from 'inversify';
-import Knex, { CreateTableBuilder, QueryInterface } from 'knex';
+import knex, { CreateTableBuilder, QueryInterface } from 'knex';
 
 import { IApplicationEvent } from '../application';
 import { TYPES } from '../infrastructure';
@@ -16,8 +16,11 @@ import {
   ITableDefinition
 } from './interfaces';
 
-const getDefinition = (c: ColumnType | IColumnDefinition) =>
-  typeof c === 'string' ? { type: c } : c;
+const getDefinition = (c: ColumnType | IColumnDefinition) => {
+  const def = typeof c === 'string' ? { type: c } : c;
+  def.opts = def.opts || [];
+  return def;
+};
 
 const buildColumnWith = (builder: CreateTableBuilder) => (
   name: string,
@@ -25,31 +28,56 @@ const buildColumnWith = (builder: CreateTableBuilder) => (
 ) => {
   switch (c.type) {
     case 'boolean':
+      builder.boolean(name);
+      break;
     case 'bigInteger':
+      builder.bigInteger(name);
+      break;
     case 'date':
+      builder.date(name);
+      break;
     case 'increments':
+      builder.increments(name);
+      break;
     case 'integer':
+      builder.integer(name);
+      break;
     case 'json':
+      builder.json(name);
+      break;
     case 'jsonb':
+      builder.jsonb(name);
+      break;
     case 'text':
-    case 'uuid': {
-      const fn = builder[c.type];
-      fn(name);
+      builder.text(name, ...c.opts!);
       break;
-    }
+    case 'uuid':
+      builder.uuid(name);
+      break;
     case 'binary':
-    case 'dateTime':
-    case 'decimal':
-    case 'enum':
-    case 'float':
-    case 'string':
-    case 'time':
-    case 'timestamp': {
-      const fn = builder[c.type];
-      const opts: any[] = c.opts!;
-      fn(name, opts[0], ...opts.slice(1));
+      builder.binary(name, ...c.opts!);
       break;
-    }
+    case 'dateTime':
+      builder.dateTime(name);
+      break;
+    case 'decimal':
+      builder.decimal(name, ...c.opts!);
+      break;
+    case 'enum':
+      builder.enum(name, c.opts![0]);
+      break;
+    case 'float':
+      builder.float(name, ...c.opts!);
+      break;
+    case 'string':
+      builder.string(name, ...c.opts!);
+      break;
+    case 'time':
+      builder.time(name);
+      break;
+    case 'timestamp':
+      builder.timestamp(name, ...c.opts!);
+      break;
   }
 };
 
@@ -88,7 +116,7 @@ const buildTable = (table: ITableDefinition) => (
 };
 
 const ensureTable = async (
-  db: Knex,
+  db: knex,
   table: ITableDefinition
 ): Promise<QueryInterface> => {
   const exists = await db.schema.hasTable(table.name);
@@ -96,18 +124,19 @@ const ensureTable = async (
   if (!exists) {
     await db.schema.createTable(table.name, buildTable(table));
   }
-  return db(table.name);
+  const queryBuilder = db(table.name);
+
+  return queryBuilder;
 };
 
 export const createProjection = (
   definition: IProjectionDefinition
-): IDatabaseProjectionFactory => (
-  collection: QueryInterface,
-  eventSource: IEventSubscriber
-) => {
-  const handlers = definition.handlers(collection);
+): IDatabaseProjectionFactory => (eventSource: IEventSubscriber) => {
+  const applyTo = (collection: QueryInterface) => async (
+    event: IApplicationEvent
+  ) => {
+    const handlers = definition.handlers(collection);
 
-  const apply = async (event: IApplicationEvent) => {
     const {
       aggregate: { name: aggregateName },
       name: eventType
@@ -118,14 +147,12 @@ export const createProjection = (
     }
   };
 
-  const start = async () => {
-    eventSource.on('data', (event: IApplicationEvent) => apply(event));
+  const start = async (collection: QueryInterface) => {
+    eventSource.on('data', applyTo(collection));
     await eventSource.start();
   };
 
   return {
-    apply,
-    collection,
     definition,
     start
   };
@@ -133,23 +160,23 @@ export const createProjection = (
 
 @injectable()
 class DatabaseProjectionProvider implements IDatabaseProjectionProvider {
-  private _db: Knex;
+  private _db: knex;
   private _eventSubscriber: IEventSubscriber;
 
   constructor(
-    @inject(READ_MODEL.ProjectionDatabase) db: Knex,
+    @inject(READ_MODEL.ProjectionDatabaseConfig) dbConfig: object,
     @inject(TYPES.messaging.EventSubscriber) stream: IEventSubscriber
   ) {
-    this._db = db;
+    this._db = knex(dbConfig);
     this._eventSubscriber = stream;
   }
 
   public async create(
     definition: IProjectionDefinition
   ): Promise<IDatabaseProjection> {
-    const collection = await ensureTable(this._db, definition.table);
+    await ensureTable(this._db, definition.table);
     const projection = createProjection(definition);
-    return projection(collection, this._eventSubscriber);
+    return projection(this._eventSubscriber);
   }
 }
 
