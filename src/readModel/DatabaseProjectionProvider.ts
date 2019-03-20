@@ -97,10 +97,10 @@ const ensureTable = async (
 export const createProjection = (
   definition: IProjectionDefinition
 ): IDatabaseProjectionFactory => (
-  db: QueryInterface,
+  collection: QueryInterface,
   eventSource: IEventSubscriber
 ) => {
-  const handlers = definition.handlers(db);
+  const handlers = definition.handlers(collection);
 
   const apply = async (event: IApplicationEvent) => {
     const {
@@ -120,6 +120,7 @@ export const createProjection = (
 
   return {
     apply,
+    collection,
     definition,
     start
   };

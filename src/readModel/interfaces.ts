@@ -59,6 +59,7 @@ export interface IProjection {
 }
 
 export interface IDatabaseProjection extends IProjection {
+  collection: QueryInterface;
   definition: IProjectionDefinition;
   start(): Promise<void>;
 }
