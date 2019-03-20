@@ -60,6 +60,17 @@ class DatabaseProjection implements IProjection {
     }
   }
 
+  public async query(name: string, ...args: any[]) {
+    const queryType = this._definition.queries[name];
+
+    if (!queryType) {
+      throw Error(`Unknown query type "${name}"`);
+    }
+    const queryMethod = queryType(...args);
+    const db = await this._getDb();
+    return queryMethod(db);
+  }
+
   private _getEventType = ({
     aggregate: { name: aggregate },
     name: eventType

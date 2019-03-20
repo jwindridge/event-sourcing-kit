@@ -52,9 +52,13 @@ export interface IDatabaseProjectionDefinition {
       event: IApplicationEvent
     ) => void | Promise<void>;
   };
+  queries: {
+    [name: string]: (...args: any[]) => (db: QueryInterface) => Promise<any>;
+  };
 }
 
 export interface IProjection {
+  query(name: string, ...args: any[]): Promise<any>;
   apply(event: IApplicationEvent): void | Promise<void>;
 }
 
