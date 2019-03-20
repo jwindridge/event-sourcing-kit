@@ -1,6 +1,6 @@
 import { Channel, Connection, ConsumeMessage } from 'amqplib';
+import EventEmitter from 'events';
 import { injectable } from 'inversify';
-import { Readable } from 'stream';
 
 import { IApplicationEvent } from '../../../application';
 import { IEventSubscriber } from '../../messaging';
@@ -12,7 +12,7 @@ interface IAMQPEventSubscriberOpts extends IAMQPOpts {
 }
 
 @injectable()
-class AMQPEventSubscriber extends Readable implements IEventSubscriber {
+class AMQPEventSubscriber extends EventEmitter implements IEventSubscriber {
   private _connection: Connection;
   private _exchange: string;
   private _queue: string;
@@ -25,7 +25,7 @@ class AMQPEventSubscriber extends Readable implements IEventSubscriber {
     connection: Connection,
     { exchangeName, queueName = '', topic }: IAMQPEventSubscriberOpts
   ) {
-    super({ objectMode: true });
+    super();
     this._connection = connection;
     this._exchange = exchangeName;
     this._queue = queueName;
