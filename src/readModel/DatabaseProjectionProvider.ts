@@ -12,7 +12,8 @@ import {
   IDatabaseProjection,
   IDatabaseProjectionFactory,
   IProjectionDefinition,
-  ITableDefinition
+  ITableDefinition,
+  IDatabaseProjectionProvider
 } from './interfaces';
 
 const getDefinition = (c: ColumnType | IColumnDefinition) =>
@@ -127,7 +128,7 @@ export const createProjection = (
 };
 
 @injectable()
-class DatabaseProjectionProvider {
+class DatabaseProjectionProvider implements IDatabaseProjectionProvider {
   private _db: Knex;
   private _eventSubscriber: IEventSubscriber;
 

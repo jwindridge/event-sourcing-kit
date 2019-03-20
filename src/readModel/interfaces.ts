@@ -68,3 +68,7 @@ export type IDatabaseProjectionFactory = (
   db: QueryInterface,
   eventSource: IEventSubscriber
 ) => IDatabaseProjection;
+
+export interface IDatabaseProjectionProvider {
+  create(definition: IProjectionDefinition): Promise<IDatabaseProjection>;
+}
