@@ -1,10 +1,6 @@
 import { QueryInterface } from 'knex';
 import { IApplicationEvent } from '../application';
 
-export interface IProjection {
-  apply(event: IApplicationEvent): void | Promise<void>;
-}
-
 type ColumnType =
   | 'text'
   | 'integer'
@@ -56,4 +52,12 @@ export interface IDatabaseProjectionDefinition {
       event: IApplicationEvent
     ) => void | Promise<void>;
   };
+}
+
+export interface IProjection {
+  apply(event: IApplicationEvent): void | Promise<void>;
+}
+
+export interface IDatabaseProjectionFactory {
+  create(definition: IDatabaseProjectionDefinition): IProjection;
 }
