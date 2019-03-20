@@ -6,7 +6,6 @@ import { IAggregateId, IApplicationEvent } from '../application';
 import { IDomainEvent } from '../domain';
 
 import { IEventStore } from './interfaces';
-import { IEventPublisher, TYPES as MESSAGING_TYPES } from './messaging';
 import {
   IAppendOnlyStore,
   IStreamData,
@@ -21,15 +20,9 @@ interface IStoredEvent extends IStreamData {
 export class EventStore extends EventEmitter implements IEventStore {
   private readonly _storage: IAppendOnlyStore;
 
-  constructor(
-    @inject(STORAGE_TYPES.AppendOnlyStore) store: IAppendOnlyStore,
-    @inject(MESSAGING_TYPES.EventPublisher) publisher?: IEventPublisher
-  ) {
+  constructor(@inject(STORAGE_TYPES.AppendOnlyStore) store: IAppendOnlyStore) {
     super();
     this._storage = store;
-    if (publisher !== undefined) {
-      this.addListener('saved', publisher.publish);
-    }
   }
 
   public async save(
