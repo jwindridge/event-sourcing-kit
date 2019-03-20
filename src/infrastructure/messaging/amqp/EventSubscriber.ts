@@ -7,7 +7,7 @@ import { IEventSubscriber } from '../../messaging';
 import { IAMQPOpts } from './interfaces';
 
 interface IAMQPEventSubscriberOpts extends IAMQPOpts {
-  queueName: string;
+  queueName?: string;
   topic: string;
 }
 
@@ -23,7 +23,7 @@ class AMQPEventSubscriber extends Readable implements IEventSubscriber {
 
   constructor(
     connection: Connection,
-    { exchangeName, queueName, topic }: IAMQPEventSubscriberOpts
+    { exchangeName, queueName = '', topic }: IAMQPEventSubscriberOpts
   ) {
     super({ objectMode: true });
     this._connection = connection;
@@ -39,7 +39,7 @@ class AMQPEventSubscriber extends Readable implements IEventSubscriber {
       await this._channel.assertExchange(this._exchange, 'topic', {
         durable: true
       });
-      this._queue = (await this._channel.assertQueue('', {
+      this._queue = (await this._channel.assertQueue(this._queue, {
         exclusive: true
       })).queue;
       await this._subscribe();
