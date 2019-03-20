@@ -1,9 +1,9 @@
 import { Channel, Connection, ConsumeMessage } from 'amqplib';
-import EventEmitter from 'events';
 import { injectable } from 'inversify';
+import { Readable } from 'stream';
 
 import { IApplicationEvent } from '../../../application';
-
+import { IEventSubscriber } from '../../messaging';
 import { IAMQPOpts } from './interfaces';
 
 interface IAMQPEventSubscriberOpts extends IAMQPOpts {
@@ -12,11 +12,12 @@ interface IAMQPEventSubscriberOpts extends IAMQPOpts {
 }
 
 @injectable()
-class AMQPEventSubscriber extends EventEmitter {
+class AMQPEventSubscriber extends Readable implements IEventSubscriber {
   private _connection: Connection;
   private _exchange: string;
-  private _topic: string;
   private _queue: string;
+  private _started: boolean = false;
+  private _topic: string;
 
   private _channel?: Channel;
 
@@ -24,7 +25,7 @@ class AMQPEventSubscriber extends EventEmitter {
     connection: Connection,
     { exchangeName, queueName, topic }: IAMQPEventSubscriberOpts
   ) {
-    super();
+    super({ objectMode: true });
     this._connection = connection;
     this._exchange = exchangeName;
     this._queue = queueName;
@@ -32,14 +33,17 @@ class AMQPEventSubscriber extends EventEmitter {
   }
 
   public async start() {
-    this._channel = await this._connection.createChannel();
-    await this._channel.assertExchange(this._exchange, 'topic', {
-      durable: true
-    });
-    this._queue = (await this._channel.assertQueue('', {
-      exclusive: true
-    })).queue;
-    await this._subscribe();
+    if (!this._started) {
+      this._started = true;
+      this._channel = await this._connection.createChannel();
+      await this._channel.assertExchange(this._exchange, 'topic', {
+        durable: true
+      });
+      this._queue = (await this._channel.assertQueue('', {
+        exclusive: true
+      })).queue;
+      await this._subscribe();
+    }
   }
 
   private _subscribe() {
@@ -52,7 +56,7 @@ class AMQPEventSubscriber extends EventEmitter {
 
   private _handleMessage(message: ConsumeMessage): void {
     const event = this._parseMessage(message);
-    this.emit('received', event);
+    this.emit('data', event);
   }
 
   private _parseMessage(message: ConsumeMessage): IApplicationEvent {

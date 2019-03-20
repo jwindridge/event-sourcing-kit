@@ -1,7 +1,8 @@
 import { QueryInterface } from 'knex';
 import { IApplicationEvent } from '../application';
+import { IEventSubscriber } from '../infrastructure/messaging';
 
-type ColumnType =
+export type ColumnType =
   | 'text'
   | 'integer'
   | 'increments'
@@ -22,7 +23,7 @@ type ColumnType =
 
 export interface IColumnDefinition {
   type: ColumnType;
-  opts: any[];
+  opts?: any[];
 }
 
 export interface IIndexDefinition {
@@ -37,31 +38,32 @@ export interface IUniqueConstraint {
 }
 
 export interface ITableDefinition {
-  columns: { [name: string]: IColumnDefinition };
+  columns: { [name: string]: ColumnType | IColumnDefinition };
   indexes?: IIndexDefinition[];
   name: string;
   primaryKey?: string[];
   uniqueConstraints?: IUniqueConstraint[];
 }
 
-export interface IDatabaseProjectionDefinition {
+export interface IProjectionDefinition {
   table: ITableDefinition;
-  eventHandlers: {
-    [eventType: string]: (
-      db: QueryInterface,
-      event: IApplicationEvent
-    ) => void | Promise<void>;
-  };
-  queries: {
-    [name: string]: (...args: any[]) => (db: QueryInterface) => Promise<any>;
+  handlers: (
+    db: QueryInterface
+  ) => {
+    [eventType: string]: (event: IApplicationEvent) => Promise<void>;
   };
 }
 
 export interface IProjection {
-  query(name: string, ...args: any[]): Promise<any>;
-  apply(event: IApplicationEvent): void | Promise<void>;
+  apply(event: IApplicationEvent): Promise<void>;
 }
 
-export interface IDatabaseProjectionFactory {
-  create(definition: IDatabaseProjectionDefinition): IProjection;
+export interface IDatabaseProjection extends IProjection {
+  definition: IProjectionDefinition;
+  start(): Promise<void>;
 }
+
+export type IDatabaseProjectionFactory = (
+  db: QueryInterface,
+  eventSource: IEventSubscriber
+) => IDatabaseProjection;
