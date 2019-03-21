@@ -38,9 +38,10 @@ export interface ICommandHandlerMap<T> {
     entity: IPublishableAggregateState<T>,
     command: IDomainCommand,
     services?: IServiceRegistry
-  ) => void | Iterator<
-    IPublishableAggregateState<T> | Promise<IPublishableAggregateState<T>>
-  >;
+  ) =>
+    | void
+    | Iterator<IPublishableAggregateState<T>>
+    | AsyncIterator<IPublishableAggregateState<T>>;
 }
 
 export interface IEventHandlerMap<T> {

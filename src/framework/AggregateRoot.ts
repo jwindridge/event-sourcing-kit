@@ -56,10 +56,10 @@ export function createAggregateRoot<T>(
     // or it can be a generator, in which case we need to iterate through all
     // the published events
     if (generator !== undefined) {
-      let event = generator.next(instance);
+      let event = await Promise.resolve(generator.next(instance));
 
       while (!event.done) {
-        event = generator.next(instance);
+        event = await Promise.resolve(generator.next(instance));
       }
     }
 
