@@ -7,11 +7,12 @@ import {
   IPublishableAggregateState,
   IServiceRegistry
 } from './interfaces';
+import { createEvent } from './Event';
 
 export function createAggregateRoot<T>(
   definition: IAggregateDefinition<T>
 ): IAggregateRoot<T> {
-  const { name: aggregateName, eventHandlers, commands } = definition;
+  const { name: aggregateName, reducer: eventHandlers, commands } = definition;
 
   const initialState: IAggregateState<T> = {
     state: definition.initialState,
@@ -42,7 +43,11 @@ export function createAggregateRoot<T>(
     const events: IDomainEvent[] = [];
     let instance: IPublishableAggregateState<T>;
 
-    const publish = (e: IDomainEvent): IPublishableAggregateState<T> => {
+    const publish = (
+      name: string,
+      data?: object
+    ): IPublishableAggregateState<T> => {
+      const e = createEvent(name, data);
       events.push(e);
       instance = { ...applyEvent(instance, e), publish };
       return instance;
@@ -72,7 +77,7 @@ export function createAggregateRoot<T>(
 
   return {
     applyEvent,
-    handle,
+    applyCommand: handle,
     initialState,
     rehydrate,
     name: aggregateName

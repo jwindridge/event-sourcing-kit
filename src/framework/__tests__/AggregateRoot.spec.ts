@@ -13,25 +13,23 @@ const timeout = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 const definition: IAggregateDefinition<ICounter> = {
   commands: {
     *addOneAndDouble(entity, _) {
-      entity = yield entity.publish(createEvent('incremented'));
-      yield entity.publish(
-        createEvent('incrementedBy', { step: entity.state.value })
-      );
+      entity = yield entity.publish('incremented');
+      yield entity.publish('incrementedBy', { step: entity.state.value });
     },
     async *delayedIncrement(entity, _) {
       await timeout(25);
-      yield entity.publish(createEvent('incremented'));
+      yield entity.publish('incremented');
     },
     increment(entity, _) {
-      entity.publish(createEvent('incremented'));
+      entity.publish('incremented');
     },
     *incrementByDynamic(entity, command) {
       for (const step of command.data.steps) {
-        yield entity.publish(createEvent('incrementedBy', { step }));
+        yield entity.publish('incrementedBy', { step });
       }
     }
   },
-  eventHandlers: {
+  reducer: {
     incremented: (state, _) => ({
       ...state,
       value: state.value + 1
@@ -52,7 +50,7 @@ const counterAggregate = createAggregateRoot(definition);
 test('simple command handler', async t => {
   const incrementedByOne = createCommand('increment');
 
-  const events = await counterAggregate.handle(
+  const events = await counterAggregate.applyCommand(
     counterAggregate.initialState,
     incrementedByOne
   );
@@ -65,7 +63,7 @@ test('multiple yielding command handler', async t => {
     steps: [1, 2, 3, 4]
   });
 
-  const events = await counterAggregate.handle(
+  const events = await counterAggregate.applyCommand(
     counterAggregate.initialState,
     incrementedByDynamic
   );
@@ -87,7 +85,10 @@ test('stateful multiple yielding', async t => {
 
   const addOneAndDoubleCommand = createCommand('addOneAndDouble');
 
-  const events = await counterAggregate.handle(initial, addOneAndDoubleCommand);
+  const events = await counterAggregate.applyCommand(
+    initial,
+    addOneAndDoubleCommand
+  );
   t.is(events.length, 2);
   t.deepEqual(events, [
     createEvent('incremented'),
@@ -98,7 +99,7 @@ test('stateful multiple yielding', async t => {
 test('asynchronous yielding', async t => {
   const initial = counterAggregate.initialState;
   const delayedIncrement = createCommand('delayedIncrement');
-  const events = await counterAggregate.handle(initial, delayedIncrement);
+  const events = await counterAggregate.applyCommand(initial, delayedIncrement);
 
   t.is(events.length, 1);
   t.deepEqual(events, [createEvent('incremented')]);
