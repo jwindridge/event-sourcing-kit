@@ -17,6 +17,5 @@ export const createAggregateEvent = (
   ...domainEvent,
   aggregate,
   version,
-  fullName: `${aggregate.name}.${domainEvent.name}`,
   id: eventId
 });

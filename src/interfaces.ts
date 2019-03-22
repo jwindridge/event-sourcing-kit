@@ -34,21 +34,21 @@ export interface IAggregateIdentifier {
   name: string;
 }
 
-export interface IAggregateMessage {
+export interface IAggregateCommand extends IDomainCommand {
+  // Identifier for the aggregate this event addresses
   aggregate: IAggregateIdentifier;
-  fullName: string;
 }
 
-export type IAggregateCommand = IAggregateMessage & IDomainCommand;
+export interface IAggregateEvent extends IDomainEvent {
+  // Identifier for the aggregate this event corresponds to
+  aggregate: IAggregateIdentifier;
 
-export type IAggregateEvent = IDomainEvent &
-  IAggregateMessage & {
-    // Sequenced identifier for this event
-    id: number;
+  // Sequenced identifier for this event
+  id: number;
 
-    // Version of the aggregate stream at the point of this event
-    version: number;
-  };
+  // Version of the aggregate stream at the point of this event
+  version: number;
+}
 
 export interface IMessageMetadata {
   correlationId: string;
@@ -58,7 +58,7 @@ export interface IMessageMetadata {
 /**
  * Envelope wrapping the transport of information
  */
-export interface IEnvelope<M extends IDomainCommand | IDomainEvent> {
+export interface IEnvelope<M extends IAggregateCommand | IDomainEvent> {
   payload: M;
   id?: string;
   userId?: string;

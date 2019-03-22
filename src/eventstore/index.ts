@@ -2,4 +2,6 @@ export * from './interfaces';
 
 import EventStore from './EventStore';
 
-export { EventStore };
+import { FileStore, InMemoryStore } from './storage';
+
+export { EventStore, FileStore, InMemoryStore };

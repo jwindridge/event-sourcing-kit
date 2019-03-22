@@ -33,7 +33,6 @@ test('loadEvents', async t => {
     {
       aggregate: aggregateId,
       data: { by: 2 },
-      fullName: 'counter.incremented',
       id: 1,
       name: 'incremented',
       version: 1
@@ -65,7 +64,6 @@ test('loadAllEvents', async t => {
     {
       aggregate: aggregate1,
       data: { msg: 'text' },
-      fullName: 'anAggregateType.eventType1',
       id: 1,
       name: 'eventType1',
       version: 1
@@ -73,7 +71,6 @@ test('loadAllEvents', async t => {
     {
       aggregate: aggregate2,
       data: { msg: 'different text' },
-      fullName: 'anotherAggregateType.eventType2',
       id: 2,
       name: 'eventType2',
       version: 1
@@ -81,7 +78,6 @@ test('loadAllEvents', async t => {
     {
       aggregate: aggregate1,
       data: { x: 1 },
-      fullName: 'anAggregateType.eventType3',
       id: 3,
       name: 'eventType3',
       version: 2

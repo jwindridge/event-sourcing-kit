@@ -204,7 +204,7 @@ abstract class SQLProjection implements IProjection {
    * @returns Promise that resolves once projection has been updated
    */
   public async apply(event: IAggregateEvent): Promise<void> {
-    const handler = this.eventHandlers[event.fullName];
+    const handler = this.eventHandlers[`${event.aggregate.name}.${event.name}`];
     if (handler !== undefined) {
       // If this projection cares about the event, apply the handler
       await handler(this.collection!, event);
