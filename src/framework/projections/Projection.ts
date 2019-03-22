@@ -3,6 +3,7 @@ import Knex, { CreateTableBuilder, QueryInterface } from 'knex';
 import { IAggregateEvent, IEventStore } from '../interfaces';
 
 import { ITableDefinition } from '../../readModel';
+import { eventEmitterAsyncIterator } from '../util';
 import {
   ColumnType,
   IColumnDefinition,
@@ -146,6 +147,9 @@ const buildTable = (table: ITableDefinition) => (
  * Abstract class for the definition of projections backed by SQL storage
  */
 export abstract class SQLProjection implements IProjection {
+  // Promise that will resolve once this projection has caught up with all events
+  public ready: Promise<void>;
+
   // Definition of the table schema associated with this projection
   protected abstract schema: ITableDefinition;
 
@@ -164,23 +168,35 @@ export abstract class SQLProjection implements IProjection {
   // Current position (i.e. last known event) of this projection
   private _position: number = BEGINNING;
 
-  // Flag indicating whether this projection is caught up
-  private _ready: boolean = false;
-
-  // Buffered events emitted from event store while syncying projection state
-  private _buffer: IAggregateEvent[] = [];
+  // Hook to mark this projection as ready for querying
+  private _setReady?: () => void;
 
   constructor(knex: Knex, store: IEventStore) {
     this._knex = knex;
     this._store = store;
+    this.ready = new Promise(resolve => {
+      const resolved = false;
+      this._setReady = () => {
+        if (!resolved) {
+          resolve();
+        }
+      };
+    });
   }
 
   /**
    * Start the projection:
    */
   public async start(): Promise<void> {
-    // Connect event handler & buffer events while reconstituting projection state
-    this._store.on('saved', this._saveToBuffer);
+    // Connect event handler
+    // For as long as we don't call "next", this will buffer events while reconstituting projection state
+    const eventStream = eventEmitterAsyncIterator<IAggregateEvent>(
+      this._store,
+      'saved',
+      {
+        immediateSubscribe: true
+      }
+    );
 
     // Initialise SQL storage
     await this._ensureTable(this._knex);
@@ -191,19 +207,12 @@ export abstract class SQLProjection implements IProjection {
     // Apply all events that have been saved to the store since the last event known to this projection
     await this._applyEventsSince(this._position);
 
-    // Apply any buffered events
-    for (const bufferedEvent of this._buffer) {
-      await this.apply(bufferedEvent);
+    this._setReady!();
+
+    // Connect the `apply` method to the stream of events produced by the event store
+    for await (const event of eventStream) {
+      await this.apply(event);
     }
-
-    // TODO: Consider whether to use observable / generator because we need to apply events in sequence
-
-    // Add `apply` event handler
-    this._store.addListener('saved', this.apply);
-
-    // Remove buffering event listener & clear buffer
-    this._store.removeListener('saved', this._saveToBuffer);
-    this._buffer = [];
   }
 
   /**
@@ -226,7 +235,16 @@ export abstract class SQLProjection implements IProjection {
    * Rebuilds the projection's state by dropping the table & replaying all events
    * @returns Promsie that resolves once the projection has been rebuilt
    */
-  public async rebuild(): Promise<void> {}
+  public async rebuild(): Promise<void> {
+    // Drop the projection table if it exists
+    await this._knex.schema.dropTableIfExists(this.schema.name);
+
+    // Reset our saved position to 0
+    await this.updateSavedPosition(BEGINNING);
+
+    // Restart the projection
+    await this.start();
+  }
 
   /**
    * Load the last known position of this projection
@@ -240,10 +258,6 @@ export abstract class SQLProjection implements IProjection {
     // TODO: Save to storage
     this._position = position;
     return Promise.resolve();
-  }
-
-  private _saveToBuffer(event: IAggregateEvent) {
-    this._buffer.push(event);
   }
 
   /**
