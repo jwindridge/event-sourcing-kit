@@ -12,7 +12,7 @@ import {
 } from './interfaces';
 
 @injectable()
-export class AggregateRepositoryFactory implements IRepositoryFactory {
+class AggregateRepositoryFactory implements IRepositoryFactory {
   private _store: IEventStore;
 
   constructor(
@@ -25,3 +25,5 @@ export class AggregateRepositoryFactory implements IRepositoryFactory {
     return new Repository(aggregate, this._store);
   }
 }
+
+export default AggregateRepositoryFactory;
