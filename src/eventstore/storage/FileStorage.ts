@@ -32,19 +32,13 @@ export class FileStore implements IAppendOnlyStore {
     this._config = config;
   }
 
-  public async append(
-    streamId: string,
-    data: object[],
-    expectedVersion: number
-  ) {
+  public async append(streamId: string, data: object[], version: number) {
     await this._ensureExists();
-    await this._checkVersion(streamId, expectedVersion);
+    await this._checkVersion(streamId, version);
 
     await this._ensureNextId();
 
-    const records = data.map(
-      this._createRecord({ streamId, offset: expectedVersion })
-    );
+    const records = data.map(this._createRecord({ streamId, offset: version }));
 
     const encoded = this._encode(records);
     await fs.appendFile(this._config.filepath, encoded, {
@@ -77,13 +71,13 @@ export class FileStore implements IAppendOnlyStore {
 
   private async _checkVersion(
     streamId: string,
-    expectedVersion: number
+    version: number
   ): Promise<void> {
     const savedVersion = await this._getVersion(streamId);
-    if (savedVersion !== expectedVersion) {
+    if (savedVersion !== version) {
       throw new AppendOnlyStoreConcurrencyError(
         streamId,
-        expectedVersion,
+        version,
         savedVersion
       );
     }

@@ -1,7 +1,12 @@
 import uuid from 'uuid';
-import { IEnvelope, IMessage, IMessageMetadata } from './interfaces';
+import {
+  IDomainCommand,
+  IDomainEvent,
+  IEnvelope,
+  IMessageMetadata
+} from './interfaces';
 
-export const newMessage = <T extends IMessage>(
+export const newMessage = <T extends IDomainCommand | IDomainEvent>(
   payload: T,
   metadata?: IMessageMetadata
 ): IEnvelope<T> => {

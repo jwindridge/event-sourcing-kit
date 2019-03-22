@@ -1,5 +1,9 @@
 import EventEmitter from 'events';
-import { IAggregateEvent, IAggregateId, IDomainEvent } from '../interfaces';
+import {
+  IAggregateEvent,
+  IAggregateIdentifier,
+  IDomainEvent
+} from '../interfaces';
 
 /**
  * Storage mechanism for saving & retrieving aggregate events
@@ -9,13 +13,13 @@ export interface IEventStore extends EventEmitter {
    * Save a list of domain events to the stream of a given aggregate
    * @param aggregate Identifier for the aggregate root associated with the events
    * @param events List of domain events to save for this aggregate
-   * @param expectedVersion Optimistic concurrency locking - reject if event stream has been modified in parallel
+   * @param version Optimistic concurrency locking - reject if event stream has been modified in parallel
    * @returns Promise that will resolve once events successfuly saved
    */
   save(
-    aggregate: IAggregateId,
+    aggregate: IAggregateIdentifier,
     events: IDomainEvent[],
-    expectedVersion: number
+    version: number
   ): Promise<void>;
 
   /**
@@ -26,7 +30,7 @@ export interface IEventStore extends EventEmitter {
    * @returns events
    */
   loadEvents(
-    aggregate: IAggregateId,
+    aggregate: IAggregateIdentifier,
     afterVersion?: number,
     limit?: number
   ): Promise<IAggregateEvent[]>;

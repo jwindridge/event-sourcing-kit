@@ -2,7 +2,7 @@ export interface IAppendOnlyStore {
   append(
     streamId: string,
     data: object[],
-    expectedVersion?: number
+    version?: number
   ): Promise<IStreamData[]>;
   readRecords(
     streamId: string,

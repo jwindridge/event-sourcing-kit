@@ -1,5 +1,6 @@
 export * from './constants';
 export * from './interfaces';
+export * from './errors';
 
 import { createAggregateRoot } from './AggregateRoot';
 import { createCommand } from './Command';

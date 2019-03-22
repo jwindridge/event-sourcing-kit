@@ -2,14 +2,12 @@ import { IDomainCommand } from './interfaces';
 
 export function createCommand(
   name: string,
-  expectedVersion: number,
-  data?: object,
-  user?: object
+  version: number,
+  data?: object
 ): IDomainCommand {
   return {
     data,
-    expectedVersion,
     name,
-    user
+    version
   };
 }

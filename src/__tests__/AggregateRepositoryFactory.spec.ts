@@ -9,8 +9,8 @@ test('AggregateRepositoryFactory', async (t: any) => {
   let directRepositoryState = await repository.getById(counterId);
   const command = {
     data: { by: 2 },
-    expectedVersion: directRepositoryState.version,
-    name: 'increment'
+    name: 'increment',
+    version: directRepositoryState.version
   };
 
   const events = await Counter.applyCommand(

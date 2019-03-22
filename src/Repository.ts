@@ -4,7 +4,7 @@ import uuid from 'uuid';
 import { FRAMEWORK_TYPES } from './constants';
 import {
   IAggregateEvent,
-  IAggregateId,
+  IAggregateIdentifier,
   IAggregateRoot,
   IAggregateState,
   IDomainEvent,
@@ -25,13 +25,9 @@ class Repository<T> implements IRepository<T> {
     this._store = store;
   }
 
-  public async save(
-    id: string,
-    events: IDomainEvent[],
-    expectedVersion: number
-  ) {
+  public async save(id: string, events: IDomainEvent[], version: number) {
     const aggregateId = this._getAggregateId(id);
-    return this._store.save(aggregateId, events, expectedVersion);
+    return this._store.save(aggregateId, events, version);
   }
 
   public async getById(id: string): Promise<IAggregateState<T>> {
@@ -44,7 +40,7 @@ class Repository<T> implements IRepository<T> {
     return Promise.resolve(uuid.v4());
   }
 
-  private _getAggregateId(id: string): IAggregateId {
+  private _getAggregateId(id: string): IAggregateIdentifier {
     return { id, name: this._aggregate.name };
   }
 

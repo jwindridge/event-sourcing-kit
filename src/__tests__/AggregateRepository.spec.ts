@@ -10,7 +10,7 @@ test('AggregateRepository: save & retrieve', async t => {
     counterState,
     {
       data: { by: 2 },
-      expectedVersion: counterState.version,
+      version: counterState.version,
       name: 'increment'
     },
     domainServiceRegistry

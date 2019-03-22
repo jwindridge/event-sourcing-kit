@@ -3,7 +3,11 @@ import { inject, injectable } from 'inversify';
 import stringify from 'json-stable-stringify';
 
 import { createAggregateEvent } from '../Event';
-import { IAggregateEvent, IAggregateId, IDomainEvent } from '../interfaces';
+import {
+  IAggregateEvent,
+  IAggregateIdentifier,
+  IDomainEvent
+} from '../interfaces';
 
 import { FRAMEWORK_TYPES } from '../constants';
 import { IEventStore } from './interfaces';
@@ -25,23 +29,19 @@ class EventStore extends EventEmitter implements IEventStore {
   }
 
   public async save(
-    agggregateId: IAggregateId,
+    agggregateId: IAggregateIdentifier,
     events: IDomainEvent[],
-    expectedVersion: number
+    version: number
   ) {
     const streamId = this.getStreamId(agggregateId);
-    const storedEvents = await this._storage.append(
-      streamId,
-      events,
-      expectedVersion
-    );
+    const storedEvents = await this._storage.append(streamId, events, version);
     for (const event of storedEvents.map(this._convertToEvent)) {
       this.emit('saved', event);
     }
   }
 
   public async loadEvents(
-    aggregateId: IAggregateId,
+    aggregateId: IAggregateIdentifier,
     afterVersion = 0,
     limit?: number
   ) {
@@ -60,7 +60,8 @@ class EventStore extends EventEmitter implements IEventStore {
    * @param agggregateId - Aggregate identifier
    * @returns JSON-encoded aggregate id
    */
-  private getStreamId = (aggregateId: IAggregateId) => stringify(aggregateId);
+  private getStreamId = (aggregateId: IAggregateIdentifier) =>
+    stringify(aggregateId);
 
   /**
    * Convert a stream identifier back to an aggregate id
@@ -68,7 +69,7 @@ class EventStore extends EventEmitter implements IEventStore {
    * @returns Aggregate identifier
    */
   private _getAggregateId = (streamId: string) =>
-    JSON.parse(streamId) as IAggregateId;
+    JSON.parse(streamId) as IAggregateIdentifier;
 
   /**
    * Convert an event retrieved from the underlying storage into an application event

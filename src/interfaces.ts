@@ -4,27 +4,29 @@ import { IEventPublisher } from './messaging/interfaces';
 
 export { IEventPublisher };
 
-export interface IMessage {
+export interface IDomainCommand {
   // Name of the command
   name: string;
 
   // Parameters associated with this command
   data?: any;
 
-  // User initiating the command
-  user?: object;
+  // Expected version of the aggregate
+  version: number;
 }
 
-export type IDomainEvent = IMessage;
-export interface IDomainCommand extends IMessage {
-  // Expected version of the aggregate when applying this command
-  expectedVersion: number;
+export interface IDomainEvent {
+  // Name of the event
+  name: string;
+
+  // Data associated with this event
+  data?: any;
 }
 
 /**
  * Identifying information for an aggregate
  */
-export interface IAggregateId {
+export interface IAggregateIdentifier {
   // Identifier of the aggregate
   id: string;
 
@@ -32,20 +34,21 @@ export interface IAggregateId {
   name: string;
 }
 
-export interface IAggregateMessage extends IMessage {
-  aggregate: IAggregateId;
+export interface IAggregateMessage {
+  aggregate: IAggregateIdentifier;
   fullName: string;
 }
 
-export type IAggregateCommand = IAggregateMessage;
+export type IAggregateCommand = IAggregateMessage & IDomainCommand;
 
-export interface IAggregateEvent extends IAggregateMessage {
-  // Sequenced identifier for this event
-  id: number;
+export type IAggregateEvent = IDomainEvent &
+  IAggregateMessage & {
+    // Sequenced identifier for this event
+    id: number;
 
-  // Version of the aggregate stream at the point of this event
-  version: number;
-}
+    // Version of the aggregate stream at the point of this event
+    version: number;
+  };
 
 export interface IMessageMetadata {
   correlationId: string;
@@ -55,7 +58,7 @@ export interface IMessageMetadata {
 /**
  * Envelope wrapping the transport of information
  */
-export interface IEnvelope<M extends IMessage> {
+export interface IEnvelope<M extends IDomainCommand | IDomainEvent> {
   payload: M;
   id?: string;
   userId?: string;
@@ -209,14 +212,10 @@ export interface IRepository<T> {
    * Save a list of events to the stream for a given aggregate
    * @param id Identifier of the aggregate that events should be saved to
    * @param events List of events to save to this aggregate's stream
-   * @param [expectedVersion] Optimistic currency lock - will reject if event stream modified in parallel
+   * @param [version] Optimistic currency lock - will reject if event stream modified in parallel
    * @returns When events successfully saved
    */
-  save(
-    id: string,
-    events: IDomainEvent[],
-    expectedVersion?: number
-  ): Promise<void>;
+  save(id: string, events: IDomainEvent[], version?: number): Promise<void>;
 }
 
 /**

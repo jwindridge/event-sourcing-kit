@@ -13,16 +13,10 @@ export class InMemoryStore implements IAppendOnlyStore {
     this._nextId = 1;
   }
 
-  public async append(
-    streamId: string,
-    data: object[],
-    expectedVersion: number
-  ) {
-    await this._checkVersion(streamId, expectedVersion);
+  public async append(streamId: string, data: object[], version: number) {
+    await this._checkVersion(streamId, version);
 
-    const records = data.map(
-      this._createRecord({ streamId, offset: expectedVersion })
-    );
+    const records = data.map(this._createRecord({ streamId, offset: version }));
 
     const stream = this._streamsById[streamId] || [];
     this._streamsById[streamId] = [...stream, ...records];
@@ -53,13 +47,13 @@ export class InMemoryStore implements IAppendOnlyStore {
 
   private async _checkVersion(
     streamId: string,
-    expectedVersion: number
+    version: number
   ): Promise<void> {
     const savedVersion = await this._getVersion(streamId);
-    if (savedVersion !== expectedVersion) {
+    if (savedVersion !== version) {
       throw new AppendOnlyStoreConcurrencyError(
         streamId,
-        expectedVersion,
+        version,
         savedVersion
       );
     }
