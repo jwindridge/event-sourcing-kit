@@ -1,5 +1,21 @@
-import * as application from './application';
-import * as domain from './domain';
-import * as readModel from './readModel';
+export * from './constants';
+export * from './interfaces';
 
-export { application, domain, readModel };
+import { createAggregateRoot } from './AggregateRoot';
+import { createCommand } from './Command';
+import { newMessage } from './Envelope';
+import { createAggregateEvent, createEvent } from './Event';
+import EventStoreTailingPublisher from './EventStoreTailingPublisher';
+import Repository from './Repository';
+import RepositoryFactory from './RepositoryFactory';
+
+export {
+  createAggregateEvent,
+  createAggregateRoot,
+  createCommand,
+  createEvent,
+  EventStoreTailingPublisher,
+  newMessage,
+  Repository,
+  RepositoryFactory
+};
