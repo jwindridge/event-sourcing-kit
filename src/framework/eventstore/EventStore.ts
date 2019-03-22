@@ -2,25 +2,24 @@ import { EventEmitter } from 'events';
 import { inject, injectable } from 'inversify';
 import stringify from 'json-stable-stringify';
 
-import { IAggregateId, IApplicationEvent } from '../application';
-import { IDomainEvent } from '../domain';
+import { createAggregateEvent } from '../Event';
+import { IAggregateEvent, IAggregateId, IDomainEvent } from '../interfaces';
 
+import { EVENT_STORE_TYPES } from './constants';
 import { IEventStore } from './interfaces';
-import {
-  IAppendOnlyStore,
-  IStreamData,
-  TYPES as STORAGE_TYPES
-} from './storage';
+import { IAppendOnlyStore, IStreamData } from './storage';
 
 interface IStoredEvent extends IStreamData {
   data: IDomainEvent;
 }
 
 @injectable()
-export class EventStore extends EventEmitter implements IEventStore {
+class EventStore extends EventEmitter implements IEventStore {
   private readonly _storage: IAppendOnlyStore;
 
-  constructor(@inject(STORAGE_TYPES.AppendOnlyStore) store: IAppendOnlyStore) {
+  constructor(
+    @inject(EVENT_STORE_TYPES.AppendOnlyStore) store: IAppendOnlyStore
+  ) {
     super();
     this._storage = store;
   }
@@ -76,20 +75,11 @@ export class EventStore extends EventEmitter implements IEventStore {
    * @param data: Stored data retrieved from `IAppendOnlyStore`
    * @returns Application event
    */
-  private _convertToEvent: (data: IStoredEvent) => IApplicationEvent = data => {
-    const {
-      id,
-      streamId,
-      version,
-      data: { name, ...event }
-    } = data;
+  private _convertToEvent: (data: IStoredEvent) => IAggregateEvent = data => {
+    const { id, streamId, version, data: domainEvent } = data;
     const aggregate = this._getAggregateId(streamId);
-    return {
-      ...event,
-      aggregate,
-      id,
-      name,
-      version
-    };
+    return createAggregateEvent(aggregate, domainEvent, id, version);
   };
 }
+
+export default EventStore;

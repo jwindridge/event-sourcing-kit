@@ -5,7 +5,7 @@ import uuid from 'uuid';
 
 import { Container } from 'inversify';
 
-import { TYPES } from '../constants';
+import { EVENT_STORE_TYPES } from '../../constants';
 import { FileStore, FileStoreConfig, IFileStoreConfig } from '../FileStorage';
 import { IAppendOnlyStore } from '../interfaces';
 
@@ -133,13 +133,12 @@ test('retrieve all segment', async t => {
 test('injection', async t => {
   const container = new Container();
   container
-    .bind<IFileStoreConfig>(TYPES.FileStoreConfig)
-    .toConstantValue(
-      new FileStoreConfig({ filepath: t.context.TEST_FILE_PATH })
-    );
-  container.bind<IAppendOnlyStore>(TYPES.AppendOnlyStore).to(FileStore);
+    .bind<IAppendOnlyStore>(EVENT_STORE_TYPES.AppendOnlyStore)
+    .toConstantValue(new FileStore({ filepath: t.context.TEST_FILE_PATH }));
 
-  const store = container.get<IAppendOnlyStore>(TYPES.AppendOnlyStore);
+  const store = container.get<IAppendOnlyStore>(
+    EVENT_STORE_TYPES.AppendOnlyStore
+  );
 
   await store.append('dummy', [{ test: true }], 0);
   const values = await store.readRecords('dummy');

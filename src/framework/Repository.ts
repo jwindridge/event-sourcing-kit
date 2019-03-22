@@ -1,20 +1,25 @@
 import { inject, injectable } from 'inversify';
 import uuid from 'uuid';
 
-import { IAggregateId, IApplicationEvent } from '../application';
-import { IAggregate, IAggregateInstance, IDomainEvent } from '../domain';
-
-import { TYPES } from './constants';
-import { IAggregateRepository, IEventStore } from './interfaces';
+import { FRAMEWORK_TYPES } from './constants';
+import {
+  IAggregateEvent,
+  IAggregateId,
+  IAggregateRoot,
+  IAggregateState,
+  IDomainEvent,
+  IEventStore,
+  IRepository
+} from './interfaces';
 
 @injectable()
-export class AggregateRepository<T> implements IAggregateRepository<T> {
-  private _aggregate: IAggregate<T>;
+class Repository<T> implements IRepository<T> {
+  private _aggregate: IAggregateRoot<T>;
   private _store: IEventStore;
 
   constructor(
-    aggregate: IAggregate<T>,
-    @inject(TYPES.EventStore) store: IEventStore
+    aggregate: IAggregateRoot<T>,
+    @inject(FRAMEWORK_TYPES.eventstore.EventStore) store: IEventStore
   ) {
     this._aggregate = aggregate;
     this._store = store;
@@ -29,7 +34,7 @@ export class AggregateRepository<T> implements IAggregateRepository<T> {
     return this._store.save(aggregateId, events, expectedVersion);
   }
 
-  public async getById(id: string): Promise<IAggregateInstance<T>> {
+  public async getById(id: string): Promise<IAggregateState<T>> {
     const aggregateId = this._getAggregateId(id);
     const events = await this._store.loadEvents(aggregateId);
     return this._createInstance(events);
@@ -43,8 +48,10 @@ export class AggregateRepository<T> implements IAggregateRepository<T> {
     return { id, name: this._aggregate.name };
   }
 
-  private _createInstance(events: IApplicationEvent[]): IAggregateInstance<T> {
+  private _createInstance(events: IAggregateEvent[]): IAggregateState<T> {
     const { state, version } = this._aggregate.rehydrate(events);
     return { state, version, exists: version > 0 };
   }
 }
+
+export default Repository;

@@ -1,3 +1,4 @@
+import { createEvent } from './Event';
 import {
   IAggregateDefinition,
   IAggregateRoot,
@@ -7,7 +8,6 @@ import {
   IPublishableAggregateState,
   IServiceRegistry
 } from './interfaces';
-import { createEvent } from './Event';
 
 export function createAggregateRoot<T>(
   definition: IAggregateDefinition<T>
@@ -15,6 +15,7 @@ export function createAggregateRoot<T>(
   const { name: aggregateName, reducer: eventHandlers, commands } = definition;
 
   const initialState: IAggregateState<T> = {
+    exists: false,
     state: definition.initialState,
     version: 0
   };
@@ -28,6 +29,7 @@ export function createAggregateRoot<T>(
     const state = update(aggregate.state, event);
     return {
       state,
+      exists: aggregate.version !== 0,
       version: aggregate.version + 1
     };
   };

@@ -1,18 +1,20 @@
 import uuid from 'uuid';
-import { IEnvelope, IMetadata } from './interfaces';
+import { IEnvelope, IMessage, IMessageMetadata } from './interfaces';
 
-export const newMessage = <T>(
+export const newMessage = <T extends IMessage>(
   payload: T,
-  metadata?: IMetadata
+  metadata?: IMessageMetadata
 ): IEnvelope<T> => {
   const causationId = (metadata && metadata.causationId) || uuid.v4();
   const correlationId = (metadata && metadata.correlationId) || uuid.v4();
 
   return {
-    causationId,
-    correlationId,
     payload,
     id: uuid.v4(),
+    metadata: {
+      causationId,
+      correlationId
+    },
     withCorrelationId: id =>
       newMessage(payload, { causationId, correlationId: id })
   };

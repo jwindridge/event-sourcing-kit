@@ -2,7 +2,7 @@ import test from 'ava';
 
 import { Container } from 'inversify';
 
-import { TYPES } from '../constants';
+import { EVENT_STORE_TYPES } from '../../constants';
 import { InMemoryStore } from '../InMemory';
 import { IAppendOnlyStore } from '../interfaces';
 
@@ -25,9 +25,13 @@ test('append', async (t: any) => {
 
 test('injection', async (t: any) => {
   const container = new Container();
-  container.bind<IAppendOnlyStore>(TYPES.AppendOnlyStore).to(InMemoryStore);
+  container
+    .bind<IAppendOnlyStore>(EVENT_STORE_TYPES.AppendOnlyStore)
+    .to(InMemoryStore);
 
-  const store = container.get<IAppendOnlyStore>(TYPES.AppendOnlyStore);
+  const store = container.get<IAppendOnlyStore>(
+    EVENT_STORE_TYPES.AppendOnlyStore
+  );
 
   await store.append('dummy', [{ test: true }], 0);
   const values = await store.readRecords('dummy');

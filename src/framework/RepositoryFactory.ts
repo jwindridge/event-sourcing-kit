@@ -1,26 +1,27 @@
 import { inject, injectable } from 'inversify';
 
-import { IAggregate } from '../domain';
-import { TYPES } from './constants';
+import { FRAMEWORK_TYPES } from './constants';
 
-import { AggregateRepository } from './AggregateRepository';
+import Repository from './Repository';
+
 import {
-  IAggregateRepository,
-  IAggregateRepositoryFactory,
-  IEventStore
+  IAggregateRoot,
+  IEventStore,
+  IRepository,
+  IRepositoryFactory
 } from './interfaces';
 
 @injectable()
-export class AggregateRepositoryFactory implements IAggregateRepositoryFactory {
+export class AggregateRepositoryFactory implements IRepositoryFactory {
   private _store: IEventStore;
 
-  constructor(@inject(TYPES.EventStore) store: IEventStore) {
+  constructor(
+    @inject(FRAMEWORK_TYPES.eventstore.EventStore) store: IEventStore
+  ) {
     this._store = store;
   }
 
-  public createRepository<T>(
-    aggregate: IAggregate<T>
-  ): IAggregateRepository<T> {
-    return new AggregateRepository(aggregate, this._store);
+  public createRepository<T>(aggregate: IAggregateRoot<T>): IRepository<T> {
+    return new Repository(aggregate, this._store);
   }
 }

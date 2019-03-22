@@ -1,8 +1,7 @@
 import fs from 'async-file';
-import { inject, injectable } from 'inversify';
+import { injectable } from 'inversify';
 import { dirname } from 'path';
 
-import { TYPES } from './constants';
 import { AppendOnlyStoreConcurrencyError } from './errors';
 import { IAppendOnlyStore, IStreamData } from './interfaces';
 
@@ -29,7 +28,7 @@ export class FileStore implements IAppendOnlyStore {
   private readonly _config: FileStoreConfig;
   private _nextId?: number;
 
-  constructor(@inject(TYPES.FileStoreConfig) config: IFileStoreConfig) {
+  constructor(config: IFileStoreConfig) {
     this._config = config;
   }
 

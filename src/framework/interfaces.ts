@@ -13,22 +13,24 @@ export interface IMessage {
 }
 
 export type IDomainEvent = IMessage;
-export type IDomainCommand = IMessage;
+export interface IDomainCommand extends IMessage {
+  // Expected version of the aggregate when applying this command
+  expectedVersion: number;
+}
 
 /**
  * Identifying information for an aggregate
  */
 export interface IAggregateId {
-  aggregate: {
-    // Identifier of the aggregate
-    id: string;
+  // Identifier of the aggregate
+  id: string;
 
-    // Name of the aggregate
-    name: string;
-  };
+  // Name of the aggregate
+  name: string;
 }
 
-export interface IAggregateMessage extends IMessage, IAggregateId {
+export interface IAggregateMessage extends IMessage {
+  aggregate: IAggregateId;
   fullName: string;
 }
 
@@ -37,6 +39,14 @@ export type IAggregateCommand = IAggregateMessage;
 export interface IAggregateEvent extends IAggregateMessage {
   // Sequenced identifier for this event
   id: number;
+
+  // Version of the aggregate stream at the point of this event
+  version: number;
+}
+
+export interface IMessageMetadata {
+  correlationId: string;
+  causationId: string;
 }
 
 /**
@@ -46,8 +56,7 @@ export interface IEnvelope<M extends IMessage> {
   payload: M;
   id?: string;
   userId?: string;
-  correlationId: string;
-  causationId: string;
+  metadata: IMessageMetadata;
   /**
    *
    * @param id Correlation id to use for this message envelope
@@ -70,6 +79,7 @@ export interface IServiceRegistry {
  * Aggregate state as at a given revision
  */
 export interface IAggregateState<T> {
+  exists: boolean;
   state: T;
   version: number;
 }
@@ -178,7 +188,7 @@ export interface IAggregateRoot<T> {
  * Repository encapsulating storage of & reconstruction from events published by an aggregate
  * @template T: Entity represented by the aggregate root of this repository
  */
-export interface IAggregateRepository<T> {
+export interface IRepository<T> {
   /**
    * Retrieve the current state of an aggregate by it's id
    * @param id Identifier of an aggregate root
@@ -209,12 +219,12 @@ export interface IAggregateRepository<T> {
 /**
  * Factory for construction of aggregate repository instances based on an internally referenced event store
  */
-export interface IAggregateRepositoryFactory {
+export interface IRepositoryFactory {
   /**
    * Create a new repository for a given aggregate root
    * @template T Entity represented by the aggregate root of this repository
    * @param aggregate Aggregate root to provide a repository interface for
    * @returns repository Repository encapsulating access to the aggregate root
    */
-  createRepository<T>(aggregate: IAggregateRoot<T>): IAggregateRepository<T>;
+  createRepository<T>(aggregate: IAggregateRoot<T>): IRepository<T>;
 }

@@ -48,7 +48,7 @@ const definition: IAggregateDefinition<ICounter> = {
 const counterAggregate = createAggregateRoot(definition);
 
 test('simple command handler', async t => {
-  const incrementedByOne = createCommand('increment');
+  const incrementedByOne = createCommand('increment', 0);
 
   const events = await counterAggregate.applyCommand(
     counterAggregate.initialState,
@@ -59,7 +59,7 @@ test('simple command handler', async t => {
 });
 
 test('multiple yielding command handler', async t => {
-  const incrementedByDynamic = createCommand('incrementByDynamic', {
+  const incrementedByDynamic = createCommand('incrementByDynamic', 0, {
     steps: [1, 2, 3, 4]
   });
 
@@ -79,11 +79,12 @@ test('multiple yielding command handler', async t => {
 
 test('stateful multiple yielding', async t => {
   const initial = {
+    exists: true,
     state: { value: 5 },
     version: 1
   };
 
-  const addOneAndDoubleCommand = createCommand('addOneAndDouble');
+  const addOneAndDoubleCommand = createCommand('addOneAndDouble', 1);
 
   const events = await counterAggregate.applyCommand(
     initial,
@@ -98,7 +99,7 @@ test('stateful multiple yielding', async t => {
 
 test('asynchronous yielding', async t => {
   const initial = counterAggregate.initialState;
-  const delayedIncrement = createCommand('delayedIncrement');
+  const delayedIncrement = createCommand('delayedIncrement', 0);
   const events = await counterAggregate.applyCommand(initial, delayedIncrement);
 
   t.is(events.length, 1);
