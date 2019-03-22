@@ -5,7 +5,7 @@ import stringify from 'json-stable-stringify';
 import { createAggregateEvent } from '../Event';
 import { IAggregateEvent, IAggregateId, IDomainEvent } from '../interfaces';
 
-import { EVENT_STORE_TYPES } from './constants';
+import { FRAMEWORK_TYPES } from '../constants';
 import { IEventStore } from './interfaces';
 import { IAppendOnlyStore, IStreamData } from './storage';
 
@@ -18,7 +18,7 @@ class EventStore extends EventEmitter implements IEventStore {
   private readonly _storage: IAppendOnlyStore;
 
   constructor(
-    @inject(EVENT_STORE_TYPES.AppendOnlyStore) store: IAppendOnlyStore
+    @inject(FRAMEWORK_TYPES.eventstore.AppendOnlyStore) store: IAppendOnlyStore
   ) {
     super();
     this._storage = store;

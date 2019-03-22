@@ -3,9 +3,8 @@ import Knex, { CreateTableBuilder, QueryInterface } from 'knex';
 
 import { IAggregateEvent, IEventStore } from '../interfaces';
 
-import { EVENT_STORE_TYPES } from '../eventstore';
+import { FRAMEWORK_TYPES } from '../constants';
 import { eventEmitterAsyncIterator } from '../util';
-import { PROJECTION_TYPES } from './constants';
 import {
   ColumnType,
   IColumnDefinition,
@@ -153,8 +152,8 @@ abstract class SQLProjection implements IProjection {
   private _setReady?: () => void;
 
   constructor(
-    @inject(PROJECTION_TYPES.KnexClient) knex: Knex,
-    @inject(EVENT_STORE_TYPES.EventStore) store: IEventStore
+    @inject(FRAMEWORK_TYPES.projections.KnexClient) knex: Knex,
+    @inject(FRAMEWORK_TYPES.eventstore.EventStore) store: IEventStore
   ) {
     this._knex = knex;
     this._store = store;
