@@ -17,6 +17,7 @@ export const FRAMEWORK_TYPES = {
   },
 
   projections: {
-    KnexClient: 'eskit.projections.KnexClient'
+    KnexClient: Symbol('KnexClient'),
+    SQLProjection: Symbol('SQLProjection')
   }
 };
