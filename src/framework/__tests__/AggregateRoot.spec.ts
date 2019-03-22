@@ -29,6 +29,10 @@ const definition: IAggregateDefinition<ICounter> = {
       }
     }
   },
+  initialState: {
+    value: 0
+  },
+  name: 'counter',
   reducer: {
     incremented: (state, _) => ({
       ...state,
@@ -38,11 +42,7 @@ const definition: IAggregateDefinition<ICounter> = {
       ...state,
       value: state.value + event.data.step
     })
-  },
-  initialState: {
-    value: 0
-  },
-  name: 'counter'
+  }
 };
 
 const counterAggregate = createAggregateRoot(definition);
