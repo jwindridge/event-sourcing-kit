@@ -1,40 +1,20 @@
+import { inject, injectable } from 'inversify';
 import Knex, { CreateTableBuilder, QueryInterface } from 'knex';
 
 import { IAggregateEvent, IEventStore } from '../interfaces';
 
-import { ITableDefinition } from '../../readModel';
+import { EVENT_STORE_TYPES } from '../eventstore';
 import { eventEmitterAsyncIterator } from '../util';
+import { PROJECTION_TYPES } from './constants';
 import {
   ColumnType,
   IColumnDefinition,
-  ISQLProjectionEventHandlerMap
+  IProjection,
+  ISQLProjectionEventHandlerMap,
+  ITableDefinition
 } from './interfaces';
 
 const BEGINNING = 0;
-
-export interface IProjection {
-  /**
-   * Start the projection:
-   * - Bind to the event log's "saved" event dispatcher
-   * - Buffer all events received for the time being
-   * - Load the last event known to this projection
-   * - Retrieve all events saved to the log since then
-   * - Replay all buffered events
-   * - Connect the event log's "saved" event disaptcher straight to the `apply` method
-   */
-  start(): Promise<void>;
-
-  /**
-   * Apply an event to the projection state
-   * @param event Event to update the projection with
-   */
-  apply(event: IAggregateEvent): Promise<void>;
-
-  /**
-   * Discard the saved projection state & rebuild by replaying all events
-   */
-  rebuild(): Promise<void>;
-}
 
 const getDefinition = (c: ColumnType | IColumnDefinition) => {
   const def = typeof c === 'string' ? { type: c } : c;
@@ -146,7 +126,8 @@ const buildTable = (table: ITableDefinition) => (
 /**
  * Abstract class for the definition of projections backed by SQL storage
  */
-export abstract class SQLProjection implements IProjection {
+@injectable()
+abstract class SQLProjection implements IProjection {
   // Promise that will resolve once this projection has caught up with all events
   public ready: Promise<void>;
 
@@ -171,7 +152,10 @@ export abstract class SQLProjection implements IProjection {
   // Hook to mark this projection as ready for querying
   private _setReady?: () => void;
 
-  constructor(knex: Knex, store: IEventStore) {
+  constructor(
+    @inject(PROJECTION_TYPES.KnexClient) knex: Knex,
+    @inject(EVENT_STORE_TYPES.EventStore) store: IEventStore
+  ) {
     this._knex = knex;
     this._store = store;
     this.ready = new Promise(resolve => {
@@ -291,3 +275,5 @@ export abstract class SQLProjection implements IProjection {
     }
   }
 }
+
+export default SQLProjection;

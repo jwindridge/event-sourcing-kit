@@ -53,3 +53,27 @@ export interface ISQLProjectionEventHandlerMap {
     event: IAggregateEvent
   ) => Promise<void>;
 }
+
+export interface IProjection {
+  /**
+   * Start the projection:
+   * - Bind to the event log's "saved" event dispatcher
+   * - Buffer all events received for the time being
+   * - Load the last event known to this projection
+   * - Retrieve all events saved to the log since then
+   * - Replay all buffered events
+   * - Connect the event log's "saved" event disaptcher straight to the `apply` method
+   */
+  start(): Promise<void>;
+
+  /**
+   * Apply an event to the projection state
+   * @param event Event to update the projection with
+   */
+  apply(event: IAggregateEvent): Promise<void>;
+
+  /**
+   * Discard the saved projection state & rebuild by replaying all events
+   */
+  rebuild(): Promise<void>;
+}
