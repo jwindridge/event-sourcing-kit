@@ -39,8 +39,7 @@ export function createAggregateRoot<T>(
     command: IDomainCommand,
     services?: IServiceRegistry
   ): Promise<IDomainEvent[]> => {
-    const { name } = command;
-    const handler = commands[name];
+    const handler = commands[command.name];
 
     const events: IDomainEvent[] = [];
     let instance: IPublishableAggregateState<T>;
@@ -79,9 +78,9 @@ export function createAggregateRoot<T>(
 
   return {
     applyEvent,
-    applyCommand: handle,
     initialState,
     rehydrate,
+    applyCommand: handle,
     name: aggregateName
   };
 }
