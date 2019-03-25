@@ -192,10 +192,7 @@ abstract class SQLProjection implements IProjection {
 
     this._setReady!();
 
-    // Connect the `apply` method to the stream of events produced by the event store
-    for await (const event of eventStream) {
-      await this.apply(event);
-    }
+    this._bindEventStream(eventStream);
   }
 
   /**
@@ -270,6 +267,15 @@ abstract class SQLProjection implements IProjection {
   private async _applyEventsSince(position: number): Promise<void> {
     const unprocessedEvents = await this._store.loadAllEvents(position);
     for (const event of unprocessedEvents) {
+      await this.apply(event);
+    }
+  }
+
+  private async _bindEventStream(
+    eventStream: AsyncIterableIterator<IAggregateEvent>
+  ) {
+    // Connect the `apply` method to the stream of events produced by the event store
+    for await (const event of eventStream) {
       await this.apply(event);
     }
   }
