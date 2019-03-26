@@ -1,3 +1,4 @@
+import debugModule from 'debug';
 import { inject, injectable } from 'inversify';
 import Knex, { CreateTableBuilder, QueryInterface } from 'knex';
 
@@ -13,6 +14,7 @@ import {
   ITableDefinition
 } from './interfaces';
 
+const debug = debugModule('eskit:SQLProjection');
 const BEGINNING = 0;
 
 const getDefinition = (c: ColumnType | IColumnDefinition) => {
@@ -165,6 +167,14 @@ abstract class SQLProjection implements IProjection {
         }
       };
     });
+    this.start = this.start.bind(this);
+    this.apply = this.apply.bind(this);
+    this.rebuild = this.rebuild.bind(this);
+    this.getSavedPosition = this.getSavedPosition.bind(this);
+    this.updateSavedPosition = this.updateSavedPosition.bind(this);
+    this._ensureTable = this._ensureTable.bind(this);
+    this._applyEventsSince = this._applyEventsSince.bind(this);
+    this._bindEventStream = this._bindEventStream.bind(this);
   }
 
   /**
@@ -188,7 +198,13 @@ abstract class SQLProjection implements IProjection {
     this._position = await this.getSavedPosition();
 
     // Apply all events that have been saved to the store since the last event known to this projection
-    await this._applyEventsSince(this._position);
+    try {
+      await this._applyEventsSince(this._position);
+    } catch (e) {
+      const reason = new Error('Failed to start projection.');
+      reason.stack += '`\n Caused By:\n' + e.stack;
+      throw reason;
+    }
 
     this._setReady!();
 
@@ -201,10 +217,25 @@ abstract class SQLProjection implements IProjection {
    * @returns Promise that resolves once projection has been updated
    */
   public async apply(event: IAggregateEvent): Promise<void> {
-    const handler = this.eventHandlers[`${event.aggregate.name}.${event.name}`];
+    const eventType = `${event.aggregate.name}.${event.name}`.toLowerCase();
+
+    debug(`Apply event ${eventType}`);
+
+    const handler = this.eventHandlers[eventType];
+
     if (handler !== undefined) {
       // If this projection cares about the event, apply the handler
-      await handler(this.collection!, event);
+      try {
+        await handler(this.collection!, event);
+      } catch (e) {
+        const reason = new Error(
+          `Failed to apply event ${eventType} to projection`
+        );
+        reason.stack += `\nCaused by:\n` + e.stack;
+        throw reason;
+      }
+    } else {
+      debug(`Unable to find handler for ${eventType}`);
     }
 
     // Update the last known position of this projection
@@ -265,9 +296,17 @@ abstract class SQLProjection implements IProjection {
    * @returns Promise that resolves once all events have been applied
    */
   private async _applyEventsSince(position: number): Promise<void> {
+    debug(`Retrieving events since ${position}`);
     const unprocessedEvents = await this._store.loadAllEvents(position);
+    debug(`Applying ${unprocessedEvents.length} events`);
     for (const event of unprocessedEvents) {
-      await this.apply(event);
+      try {
+        await this.apply(event);
+      } catch (e) {
+        const reason = new Error(`Failed to apply event stream.`);
+        reason.stack += `\nCaused By:\n` + e.stack;
+        throw reason;
+      }
     }
   }
 

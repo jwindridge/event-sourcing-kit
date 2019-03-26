@@ -1,9 +1,13 @@
+import debugModule from 'debug';
+
 import fs from 'async-file';
 import { injectable } from 'inversify';
 import { dirname } from 'path';
 
 import { AppendOnlyStoreConcurrencyError } from './errors';
 import { IAppendOnlyStore, IStreamData } from './interfaces';
+
+const debug = debugModule('eskit:eventstore:FileStorage');
 
 const matchesStream = (streamId: string) => (record: IStreamData) =>
   record.streamId === streamId;
@@ -30,6 +34,7 @@ export class FileStore implements IAppendOnlyStore {
 
   constructor(config: IFileStoreConfig) {
     this._config = config;
+    debug(`Initialise FileStore with config ${config}`);
   }
 
   public async append(streamId: string, data: object[], version: number) {
@@ -49,10 +54,13 @@ export class FileStore implements IAppendOnlyStore {
     return records;
   }
 
-  public async readAllRecords(skip?: number, limit?: number) {
+  public async readAllRecords(skip: number = 0, limit?: number) {
+    debug(`Load all records`);
     const allRecords = await this._readFileContents();
-    const end = skip && limit && skip + limit;
-    return allRecords.slice(skip, end);
+    debug(`Loaded ${allRecords.length} records`);
+
+    debug(`Reading ${limit || 'all'} records starting at ${skip || 0}`);
+    return allRecords.slice(skip).slice(0, limit);
   }
 
   public async readRecords(streamId: string, after?: number, limit?: number) {
@@ -99,6 +107,7 @@ export class FileStore implements IAppendOnlyStore {
 
   private async _readFileContents(): Promise<IStreamData[]> {
     await this._ensureExists();
+    debug(`Read contents of ${this._config.filepath}`);
     const fileContents = await fs.readTextFile(
       this._config.filepath,
       'utf8',
