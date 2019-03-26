@@ -22,6 +22,11 @@ declare module '@elastic.io/amqp-rpc' {
 
   type CommandCallback = (c: Command) => void;
 
+  export interface IAMQPEventsSenderOpts {
+    TTL?: number;
+    queueName?: string;
+  }
+
   export interface IAMQPEventsReceiverOpts {
     queueName?: string;
   }
@@ -71,6 +76,70 @@ declare module '@elastic.io/amqp-rpc' {
      * @return {Promise<void>}
      */
     public disconnect(): Promise<void>;
+  }
+
+  /**
+   * @class AMQPEventsSender
+   * Provides stream like "sink" for events, that should be
+   * transported though amqp
+   * Should be used with AMQPEventsReceiver. In such case
+   * will correctly handle queue removal, connection/disconnection
+   * listener destroy providing stream-like events inteface (end/error/close);
+   * @emits AMQPEventsSender#data
+   * @emits AMQPEventsSender#close
+   * @emits AMQPEventsSender#end
+   */
+  //TODO think about: this class may be transformed to real ReadableStream
+  //when it would be required
+  class AMQPEventsSender extends EventEmitter {
+    /**
+     * Returns a timeout for a command result retrieval.
+     *
+     * @static
+     * @returns {Number}
+     */
+    public TTL: number;
+
+    /**
+     * @constructor
+     * @param {amqplib.Connection} amqpConnection
+     * @param {Object} params
+     * @param {String} [params.queueName] queue for sending events, should correspond with AMQPEventsReceiver
+     * @param {Number} [params.TTL=AMQPEventsSender.TTL] TTL of messages
+     */
+    constructor(amqpConnection: Connection, params?: IAMQPEventsSenderOpts);
+
+    /**
+     * Send message to receiver
+     * @param {*} message, anything that may be serialized by JSON.stringify
+     * @retiurns {Promise}
+     */
+    public send(message: any): Promise<void>;
+
+    /**
+     * Opposite to this.start() – closing communication channel
+     * NOTE! Race condition is not handled here,
+     *    so it's better to not invoke the method several times (e.g. from multiple "threads")
+     *
+     * @return {Promise<void>}
+     */
+    public disconnect(): Promise<void>;
+
+    /**
+     * Channel initialization, has to be done before starting working
+     * NOTE! Race condition is not handled here,
+     *    so it's better to not invoke the method several times (e.g. from multiple "threads")
+     *
+     * @return {Promise<void>}
+     */
+    public start(): Promise<void>;
+
+    /**
+     * Subscribe to events on channel.
+     * Events used to understand, if listener is ok
+     * and/or for error handling
+     */
+    private _subscribeToChannel(): void;
   }
 
   /**
