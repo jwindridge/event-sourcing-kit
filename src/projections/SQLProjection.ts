@@ -196,7 +196,7 @@ abstract class SQLProjection implements IProjection {
    * @returns Promise that resolves once all events have been applied
    */
   private async _applyEventsSince(position: number): Promise<void> {
-    debug(`Retrieving events since ${position}`);
+    debug(`Retrieving events since event #${position}`);
     const unprocessedEvents = await this._store.loadAllEvents(position);
     debug(`Applying ${unprocessedEvents.length} events`);
     for (const event of unprocessedEvents) {
