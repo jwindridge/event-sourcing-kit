@@ -1,6 +1,6 @@
 {
-  "name": "@authentik8/event-sourcing-kit",
-  "version": "0.2.0",
+  "name": "eskit",
+  "version": "0.4.0",
   "description": "Libary for simplifying development of event-sourced applications",
   "main": "build/main/index.js",
   "typings": "build/main/index.d.ts",
@@ -51,13 +51,13 @@
     "node": ">=8.9"
   },
   "dependencies": {
-    "@types/amqplib": "^0.5.11",
-    "@types/json-stable-stringify": "^1.0.32",
-    "@types/reflect-metadata": "^0.1.0",
+    "@elastic.io/amqp-rpc": "^2.1.0",
     "amqplib": "^0.5.3",
     "async-file": "^2.0.2",
+    "debug": "^4.1.1",
     "inversify": "^5.0.1",
     "json-stable-stringify": "^1.0.1",
+    "knex": "^0.16.3",
     "ninos": "^2.0.2",
     "rambda": "^2.4.1",
     "reflect-metadata": "^0.1.13",
@@ -65,7 +65,11 @@
     "uuid": "^3.3.2"
   },
   "devDependencies": {
+    "@types/amqplib": "^0.5.11",
+    "@types/debug": "^4.1.2",
+    "@types/json-stable-stringify": "^1.0.32",
     "@types/node": "^11.10.5",
+    "@types/reflect-metadata": "^0.1.0",
     "@types/uuid": "^3.4.4",
     "ava": "1.0.0-beta.7",
     "codecov": "^3.1.0",
@@ -77,11 +81,15 @@
     "prettier": "^1.15.2",
     "standard-version": "^4.4.0",
     "trash-cli": "^1.4.0",
-    "tslint": "^5.11.0",
+    "tslint": "^5.14.0",
     "tslint-config-prettier": "^1.17.0",
     "tslint-immutable": "^5.0.0",
     "typedoc": "^0.13.0",
     "typescript": "^3.1.6"
+  },
+  "optionalDependencies": {
+    "pg": "^7.9.0",
+    "pg-native": "^3.0.0"
   },
   "ava": {
     "failFast": true,

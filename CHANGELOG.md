@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="0.4.0"></a>
+# [0.4.0](https://github.com/authentik8/event-sourcing-kit/compare/v0.2.0...v0.4.0) (2019-03-26)
+
+
+### Features
+
+* Rename to `eskit` ([9c1c79a](https://github.com/authentik8/event-sourcing-kit/commit/9c1c79a))
+* Restructure library ([#6](https://github.com/authentik8/event-sourcing-kit/issues/6)) ([12242fe](https://github.com/authentik8/event-sourcing-kit/commit/12242fe))
+
+
+### BREAKING CHANGES
+
+* Changed package name to `eskit`
+
+
+
+<a name="0.3.0"></a>
+# [0.3.0](https://github.com/authentik8/event-sourcing-kit/compare/v0.2.0...v0.3.0) (2019-03-22)
+
+
+### Features
+
+* Add EventPublisher ([606bdf0](https://github.com/authentik8/event-sourcing-kit/commit/606bdf0))
+* Add EventSubscriber ([f6f6ae7](https://github.com/authentik8/event-sourcing-kit/commit/f6f6ae7))
+* Rename to `eskit` ([9c1c79a](https://github.com/authentik8/event-sourcing-kit/commit/9c1c79a))
+
+
+### BREAKING CHANGES
+
+* Changed package name to `eskit`
+
+
+
 <a name="0.2.0"></a>
 # [0.2.0](https://github.com/authentik8/event-sourcing-kit/compare/v0.1.3...v0.2.0) (2019-03-15)
 
