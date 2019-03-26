@@ -1,5 +1,6 @@
 export * from './interfaces';
 
 import SQLProjection from './SQLProjection';
+import SQLProjectionPositionStore from './SQLProjectionPositionStore';
 
-export { SQLProjection };
+export { SQLProjection, SQLProjectionPositionStore };

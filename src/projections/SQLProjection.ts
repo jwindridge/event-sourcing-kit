@@ -1,128 +1,21 @@
 import debugModule from 'debug';
 import { inject, injectable } from 'inversify';
-import Knex, { CreateTableBuilder, QueryInterface } from 'knex';
+import Knex, { QueryInterface } from 'knex';
 
 import { IAggregateEvent, IEventStore } from '../interfaces';
 
 import { FRAMEWORK_TYPES } from '../constants';
 import { eventEmitterAsyncIterator } from '../util';
 import {
-  ColumnType,
-  IColumnDefinition,
   IProjection,
   ISQLProjectionEventHandlerMap,
-  ITableDefinition
+  ITableDefinition,
+  IProjectionPositionStore
 } from './interfaces';
+import { buildTable } from './util';
 
 const debug = debugModule('eskit:SQLProjection');
 const BEGINNING = 0;
-
-const getDefinition = (c: ColumnType | IColumnDefinition) => {
-  const def = typeof c === 'string' ? { type: c } : c;
-  def.opts = def.opts || [];
-  return def;
-};
-
-/**
- * Curried function for defining column creation operations
- * @param builder Knex chained table builder
- */
-const buildColumnWith = (builder: CreateTableBuilder) => (
-  name: string,
-  c: IColumnDefinition
-) => {
-  switch (c.type) {
-    case 'boolean':
-      builder.boolean(name);
-      break;
-    case 'bigInteger':
-      builder.bigInteger(name);
-      break;
-    case 'date':
-      builder.date(name);
-      break;
-    case 'increments':
-      builder.increments(name);
-      break;
-    case 'integer':
-      builder.integer(name);
-      break;
-    case 'json':
-      builder.json(name);
-      break;
-    case 'jsonb':
-      builder.jsonb(name);
-      break;
-    case 'text':
-      builder.text(name, ...c.opts!);
-      break;
-    case 'uuid':
-      builder.uuid(name);
-      break;
-    case 'binary':
-      builder.binary(name, ...c.opts!);
-      break;
-    case 'dateTime':
-      builder.dateTime(name);
-      break;
-    case 'decimal':
-      builder.decimal(name, ...c.opts!);
-      break;
-    case 'enum':
-      builder.enum(name, c.opts![0]);
-      break;
-    case 'float':
-      builder.float(name, ...c.opts!);
-      break;
-    case 'string':
-      builder.string(name, ...c.opts!);
-      break;
-    case 'time':
-      builder.time(name);
-      break;
-    case 'timestamp':
-      builder.timestamp(name, ...c.opts!);
-      break;
-  }
-};
-
-/**
- * Curried function for building a database schema using Knex
- * @param table Table definition
- */
-const buildTable = (table: ITableDefinition) => (
-  builder: CreateTableBuilder
-) => {
-  const buildColumn = buildColumnWith(builder);
-
-  let primaryKeySet = false;
-
-  Object.entries(table.columns).forEach(([name, definition]) => {
-    const def = getDefinition(definition);
-    buildColumn(name, def);
-    // If we have defined an autoincrementing column then this will be set as the primary key
-    primaryKeySet = primaryKeySet || def.type === 'increments';
-  });
-
-  // Ensure that the table has a primary key
-  if (!primaryKeySet) {
-    if (table.primaryKey !== undefined && !table.primaryKey.length) {
-      throw Error(
-        `Unable to create primary key column for table ${table.name}`
-      );
-    }
-    builder.primary(table.primaryKey!);
-  }
-  // Set up any unique constraints required
-  (table.uniqueConstraints || []).forEach(unique =>
-    builder.unique(unique.columns, unique.name)
-  );
-
-  // Set up any indices required on the table
-  (table.indexes || []).forEach(idx =>
-    builder.index(idx.columns, idx.name, idx.type)
-  );
-};
 
 /**
  * Abstract class for the definition of projections backed by SQL storage
@@ -148,17 +41,23 @@ abstract class SQLProjection implements IProjection {
   private _store: IEventStore;
 
   // Current position (i.e. last known event) of this projection
-  private _position: number = BEGINNING;
+  private _position?: number;
+
+  // Storage for current position
+  private _positionStore: IProjectionPositionStore;
 
   // Hook to mark this projection as ready for querying
   private _setReady?: () => void;
 
   constructor(
     @inject(FRAMEWORK_TYPES.projections.KnexClient) knex: Knex,
-    @inject(FRAMEWORK_TYPES.eventstore.EventStore) store: IEventStore
+    @inject(FRAMEWORK_TYPES.eventstore.EventStore) store: IEventStore,
+    @inject(FRAMEWORK_TYPES.projections.ProjectionPositionStore)
+    positionStore: IProjectionPositionStore
   ) {
     this._knex = knex;
     this._store = store;
+    this._positionStore = positionStore;
     this.ready = new Promise(resolve => {
       const resolved = false;
       this._setReady = () => {
@@ -261,14 +160,15 @@ abstract class SQLProjection implements IProjection {
    * Load the last known position of this projection
    */
   protected async getSavedPosition(): Promise<number> {
-    // TODO: Load from storage somehow
-    return Promise.resolve(0);
+    if (this._position === undefined) {
+      this._position = await this._positionStore.load(this.schema.name);
+    }
+    return Promise.resolve(this._position);
   }
 
   protected async updateSavedPosition(position: number): Promise<void> {
-    // TODO: Save to storage
     this._position = position;
-    return Promise.resolve();
+    await this._positionStore.update(this.schema.name, position);
   }
 
   /**

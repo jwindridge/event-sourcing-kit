@@ -18,6 +18,7 @@ export const FRAMEWORK_TYPES = {
 
   projections: {
     KnexClient: Symbol('KnexClient'),
+    ProjectionPositionStore: Symbol('ProjectionPositionStore'),
     SQLProjection: Symbol('SQLProjection')
   }
 };

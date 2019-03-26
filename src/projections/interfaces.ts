@@ -77,3 +77,22 @@ export interface IProjection {
    */
   rebuild(): Promise<void>;
 }
+
+/**
+ * Storage mechanism for recording the current position of a projection
+ */
+export interface IProjectionPositionStore {
+  /**
+   * Load the saved position of a projection
+   * @param identifier Projection identifier
+   */
+  load(identifier: string): Promise<number>;
+
+  /**
+   * Save the last known position of a projection
+   * @param identifier Projection identifier
+   * @param position New position of the projection
+   * @returns when updated position saved
+   */
+  update(identifier: string, position: number): Promise<void>;
+}
