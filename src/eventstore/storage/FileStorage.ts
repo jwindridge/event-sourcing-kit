@@ -34,7 +34,7 @@ export class FileStore implements IAppendOnlyStore {
 
   constructor(config: IFileStoreConfig) {
     this._config = config;
-    debug(`Initialise FileStore with config ${config}`);
+    debug(`Initialise FileStore using "${config.filepath}"`);
   }
 
   public async append(streamId: string, data: object[], version: number) {

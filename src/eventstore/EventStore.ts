@@ -14,7 +14,7 @@ import { FRAMEWORK_TYPES } from '../constants';
 import { IEventStore } from './interfaces';
 import { IAppendOnlyStore, IStreamData } from './storage';
 
-const debug = debugModule('eskit:eventstore');
+const debug = debugModule('eskit:eventstore:EventStore');
 
 interface IStoredEvent extends IStreamData {
   data: IDomainEvent;
