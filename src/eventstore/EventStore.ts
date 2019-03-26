@@ -1,3 +1,4 @@
+import debugModule from 'debug';
 import { EventEmitter } from 'events';
 import { inject, injectable } from 'inversify';
 import stringify from 'json-stable-stringify';
@@ -12,6 +13,8 @@ import {
 import { FRAMEWORK_TYPES } from '../constants';
 import { IEventStore } from './interfaces';
 import { IAppendOnlyStore, IStreamData } from './storage';
+
+const debug = debugModule('eskit:eventstore');
 
 interface IStoredEvent extends IStreamData {
   data: IDomainEvent;
@@ -34,10 +37,12 @@ class EventStore extends EventEmitter implements IEventStore {
     version: number
   ) {
     const streamId = this.getStreamId(agggregateId);
+    debug(`Saving ${events.length} events to ${streamId}`);
     const storedEvents = await this._storage.append(streamId, events, version);
     for (const event of storedEvents.map(this._convertToEvent)) {
       this.emit('saved', event);
     }
+    debug(`Saved successfully - emitted ${storedEvents.length} "saved" events`);
   }
 
   public async loadEvents(
@@ -46,11 +51,25 @@ class EventStore extends EventEmitter implements IEventStore {
     limit?: number
   ) {
     const streamId = this.getStreamId(aggregateId);
+    debug(
+      `Converted aggregate ${aggregateId.name}:${
+        aggregateId.id
+      } to stream ${streamId}`
+    );
+    debug(
+      `Loading ${limit ||
+        'all'} events from "${streamId}" starting at version ${afterVersion}`
+    );
     const data = await this._storage.readRecords(streamId, afterVersion, limit);
+    debug(`Retrieved ${data.length} records for stream "${streamId}"`);
     return data.map(this._convertToEvent);
   }
 
   public async loadAllEvents(skip = 0, limit?: number) {
+    debug(
+      `Loading ${limit ||
+        'all'} events from across all streams, starting at position ${skip}`
+    );
     const data = await this._storage.readAllRecords(skip, limit);
     return data.map(this._convertToEvent);
   }

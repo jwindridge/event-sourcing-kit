@@ -8,9 +8,9 @@ import { FRAMEWORK_TYPES } from '../constants';
 import { eventEmitterAsyncIterator } from '../util';
 import {
   IProjection,
+  IProjectionPositionStore,
   ISQLProjectionEventHandlerMap,
-  ITableDefinition,
-  IProjectionPositionStore
+  ITableDefinition
 } from './interfaces';
 import { buildTable } from './util';
 
