@@ -50,6 +50,7 @@ class SQLProjectionPositionStore implements IProjectionPositionStore {
   public async update(identifier: string, position: number): Promise<void> {
     await this._ensureTable(this._knex);
     const updated = (await this._collection!.where({ identifier })
+
       .update({ position }, ['identifier'])
       .then()) as string[];
     debug(

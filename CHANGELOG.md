@@ -12,7 +12,6 @@ All notable changes to this project will be documented in this file. See [standa
 * Wrong column identifier used in knex update ([d25ab52](https://github.com/authentik8/event-sourcing-kit/commit/d25ab52))
 
 
-
 <a name="0.4.0"></a>
 # [0.4.0](https://github.com/authentik8/event-sourcing-kit/compare/v0.2.0...v0.4.0) (2019-03-26)
 
