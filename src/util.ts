@@ -1,8 +1,10 @@
 /**
  * Code adapted from https://github.com/apollographql/graphql-subscriptions/blob/master/src/event-emitter-to-async-iterator.ts'
  */
-
+import debugModule from 'debug';
 import { EventEmitter } from 'events';
+
+const debug = debugModule('eskit:util');
 
 type ResolveFunc<T> = (value: T) => void;
 
@@ -22,18 +24,31 @@ export function eventEmitterAsyncIterator<T>(
 
   const pushValue = (event: T) => {
     if (pullQueue.length !== 0) {
+      debug(`Call resolve function on pull queue with value ${event}`);
       pullQueue.shift()!({ value: event, done: false });
+      debug(`${pullQueue.length} resolvers remaining on pull queue`);
     } else {
       pushQueue.push(event);
+      debug(
+        `Add data to push queue (${pushQueue.length} buffered values): ${event}`
+      );
     }
   };
 
   const pullValue: () => Promise<{ value: T; done: boolean }> = () => {
     return new Promise(resolve => {
       if (pushQueue.length !== 0) {
-        resolve({ value: pushQueue.shift()!, done: false });
+        const value = pushQueue.shift()!;
+        resolve({ value, done: false });
+        debug(`Resolved promise with buffered value ${value}`);
+        debug(`${pushQueue.length} buffered values remaining`);
       } else {
         pullQueue.push(resolve);
+        debug(
+          `Added resolve function to pull queue (${
+            pullQueue.length
+          } pending promises)`
+        );
       }
     });
   };
@@ -55,6 +70,7 @@ export function eventEmitterAsyncIterator<T>(
   const addEventListeners = () => {
     for (const eventName of eventsArray) {
       eventEmitter.addListener(eventName, pushValue);
+      debug(`Subscribed to "${eventName}" event`);
     }
     addedListeners = true;
   };
