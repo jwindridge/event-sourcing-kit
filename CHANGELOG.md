@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="0.4.1"></a>
+## [0.4.1](https://github.com/authentik8/event-sourcing-kit/compare/v0.4.0...v0.4.1) (2019-03-27)
+
+
+### Bug Fixes
+
+* Stale knex querybuilder instance ([a8ba033](https://github.com/authentik8/event-sourcing-kit/commit/a8ba033))
+* Wrong column identifier used in knex update ([d25ab52](https://github.com/authentik8/event-sourcing-kit/commit/d25ab52))
+
+
+
 <a name="0.4.0"></a>
 # [0.4.0](https://github.com/authentik8/event-sourcing-kit/compare/v0.2.0...v0.4.0) (2019-03-26)
 
