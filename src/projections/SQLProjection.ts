@@ -14,7 +14,7 @@ import {
 } from './interfaces';
 import { buildTable } from './util';
 
-const debug = debugModule('eskit:SQLProjection');
+const debug = debugModule('eskit:projections:SQLProjection');
 const BEGINNING = 0;
 
 /**
@@ -80,6 +80,7 @@ abstract class SQLProjection implements IProjection {
         immediateSubscribe: true
       }
     );
+    debug(`Created generator from event emitter: ${eventStream}`);
 
     // Initialise SQL storage
     await this._ensureTable(this._knex);
@@ -212,7 +213,9 @@ abstract class SQLProjection implements IProjection {
     eventStream: AsyncIterableIterator<IAggregateEvent>
   ) {
     // Connect the `apply` method to the stream of events produced by the event store
+    debug('Binding to event stream');
     for await (const event of eventStream) {
+      debug(`Received event from stream: ${event}`);
       await this.apply(event);
     }
   }

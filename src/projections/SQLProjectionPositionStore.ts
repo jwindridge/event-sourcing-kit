@@ -7,7 +7,7 @@ import { IProjectionPositionStore, ITableDefinition } from './interfaces';
 
 import { buildTable } from './util';
 
-const debug = debugModule('eskit:SQLProjectionPositionStore');
+const debug = debugModule('eskit:projections:SQLProjectionPositionStore');
 
 const SCHEMA: ITableDefinition = {
   columns: {
