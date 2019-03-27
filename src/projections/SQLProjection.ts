@@ -22,8 +22,6 @@ const BEGINNING = 0;
  */
 @injectable()
 abstract class SQLProjection implements IProjection {
-  // Promise that will resolve once this projection has caught up with all events
-  public ready: Promise<void>;
 
   // Definition of the table schema associated with this projection
   protected abstract schema: ITableDefinition;
@@ -31,8 +29,13 @@ abstract class SQLProjection implements IProjection {
   // Map of event types to the corresponding database operations that should be performed
   protected abstract eventHandlers: ISQLProjectionEventHandlerMap;
 
-  // Query interface for the projection's SQL table
-  protected collection?: QueryInterface;
+  // Base query interface for the projection's SQL table
+  private _collection?: QueryInterface;
+
+  // Public getter for the projection's SQL table, producing a new instance each time
+  protected get collection(): QueryInterface {
+    return this._collection!.clone();
+  }
 
   // Store the `knex` instance used to connect to the database
   private _knex: Knex;
@@ -46,9 +49,6 @@ abstract class SQLProjection implements IProjection {
   // Storage for current position
   private _positionStore: IProjectionPositionStore;
 
-  // Hook to mark this projection as ready for querying
-  private _setReady?: () => void;
-
   constructor(
     @inject(FRAMEWORK_TYPES.projections.KnexClient) knex: Knex,
     @inject(FRAMEWORK_TYPES.eventstore.EventStore) store: IEventStore,
@@ -58,14 +58,6 @@ abstract class SQLProjection implements IProjection {
     this._knex = knex;
     this._store = store;
     this._positionStore = positionStore;
-    this.ready = new Promise(resolve => {
-      const resolved = false;
-      this._setReady = () => {
-        if (!resolved) {
-          resolve();
-        }
-      };
-    });
     this.start = this.start.bind(this);
     this.apply = this.apply.bind(this);
     this.rebuild = this.rebuild.bind(this);
@@ -105,8 +97,6 @@ abstract class SQLProjection implements IProjection {
       throw reason;
     }
 
-    this._setReady!();
-
     this._bindEventStream(eventStream);
   }
 
@@ -118,7 +108,7 @@ abstract class SQLProjection implements IProjection {
   public async apply(event: IAggregateEvent): Promise<void> {
     const eventType = `${event.aggregate.name}.${event.name}`.toLowerCase();
 
-    debug(`Apply event ${eventType}`);
+    debug(`Apply event ${eventType}: ${JSON.stringify(event)}`);
 
     const handler = this.eventHandlers[eventType];
 
@@ -148,12 +138,15 @@ abstract class SQLProjection implements IProjection {
   public async rebuild(): Promise<void> {
     // Drop the projection table if it exists
     await this._knex.schema.dropTableIfExists(this.schema.name);
+    debug(`Dropped table "${this.schema.name}"`);
 
     // Reset our saved position to 0
     await this.updateSavedPosition(BEGINNING);
+    debug(`Reset projection position to ${BEGINNING}`);
 
     // Restart the projection
     await this.start();
+    debug('Started projection');
   }
 
   /**
@@ -168,7 +161,13 @@ abstract class SQLProjection implements IProjection {
 
   protected async updateSavedPosition(position: number): Promise<void> {
     this._position = position;
-    await this._positionStore.update(this.schema.name, position);
+    try {
+      await this._positionStore.update(this.schema.name, position);
+    } catch (e) {
+      const reason = new Error(`Failed to update SQL Projection position.`);
+      reason.stack += '\nCaused By:\n' + e.stack;
+      throw reason;
+    }
   }
 
   /**
@@ -187,7 +186,8 @@ abstract class SQLProjection implements IProjection {
     }
 
     // Set the collection attribute on the projection
-    this.collection = db(tableName);
+    this._collection = db(tableName);
+
   }
 
   /**

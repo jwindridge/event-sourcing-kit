@@ -50,9 +50,14 @@ class SQLProjectionPositionStore implements IProjectionPositionStore {
   public async update(identifier: string, position: number): Promise<void> {
     await this._ensureTable(this._knex);
     const updated = (await this._collection!.where({ identifier })
-      .update({ position }, ['id'])
+
+      .update({ position }, ['identifier'])
       .then()) as string[];
-    debug(`Updated ${updated.length} row(s) in table`);
+    debug(
+      `Updated position of ${identifier} to ${position} (${
+        updated.length
+      } row(s))`
+    );
     if (updated.length === 0) {
       debug(`No saved position for ${identifier}, inserting new row`);
       await this._collection!.insert({ identifier, position });

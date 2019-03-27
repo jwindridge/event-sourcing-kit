@@ -81,6 +81,6 @@ export function createAggregateRoot<T>(
     initialState,
     rehydrate,
     applyCommand: handle,
-    name: aggregateName
+    name: aggregateName.toLowerCase()
   };
 }
