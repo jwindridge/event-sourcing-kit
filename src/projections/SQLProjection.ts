@@ -22,6 +22,7 @@ const BEGINNING = 0;
  */
 @injectable()
 abstract class SQLProjection implements IProjection {
+
   // Definition of the table schema associated with this projection
   protected abstract schema: ITableDefinition;
 
@@ -187,6 +188,7 @@ abstract class SQLProjection implements IProjection {
 
     // Set the collection attribute on the projection
     this._collection = db(tableName);
+
   }
 
   /**
