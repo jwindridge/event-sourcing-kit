@@ -149,6 +149,11 @@ export interface IAggregateRoot<T> {
   name: string;
 
   /**
+   * Commands exposed by this aggregate root
+   */
+  commands: string[];
+
+  /**
    * Initial aggregate state
    */
   initialState: IAggregateState<T>;

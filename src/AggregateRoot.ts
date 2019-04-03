@@ -81,6 +81,7 @@ export function createAggregateRoot<T>(
     initialState,
     rehydrate,
     applyCommand: handle,
+    commands: Object.keys(commands).map(cmd => cmd.toLowerCase()),
     name: aggregateName.toLowerCase()
   };
 }
