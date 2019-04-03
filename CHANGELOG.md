@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="0.6.1"></a>
+## [0.6.1](https://github.com/authentik8/event-sourcing-kit/compare/v0.6.0...v0.6.1) (2019-04-03)
+
+
+### Features
+
+* Add SQLProjection.ready() function ([e5e0800](https://github.com/authentik8/event-sourcing-kit/commit/e5e0800))
+
+
+
 <a name="0.6.0"></a>
 # [0.6.0](https://github.com/authentik8/event-sourcing-kit/compare/v0.5.1...v0.6.0) (2019-04-03)
 
