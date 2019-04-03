@@ -1,12 +1,12 @@
 import uuid from 'uuid';
 import {
-  IDomainCommand,
-  IDomainEvent,
+  IAggregateCommand,
+  IAggregateEvent,
   IEnvelope,
   IMessageMetadata
 } from './interfaces';
 
-export const newMessage = <T extends IDomainCommand | IDomainEvent>(
+export const newMessage = <T extends IAggregateCommand | IAggregateEvent>(
   payload: T,
   metadata?: IMessageMetadata
 ): IEnvelope<T> => {

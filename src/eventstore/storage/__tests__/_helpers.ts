@@ -1,9 +1,12 @@
 import aTest, { TestInterface } from 'ava';
+import { WithoutTimestamp } from '../../../util/testing';
+
+import { IStreamData } from '..';
 
 export interface ITestStreamData {
   id: string;
   data: object[];
-  expectedResult: (offset: number) => object[];
+  expectedResult: (offset: number) => Array<WithoutTimestamp<IStreamData>>;
 }
 
 export const test = aTest as TestInterface<{

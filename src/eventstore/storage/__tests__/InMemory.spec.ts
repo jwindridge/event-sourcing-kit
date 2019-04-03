@@ -3,6 +3,8 @@ import test from 'ava';
 import { Container } from 'inversify';
 
 import { FRAMEWORK_TYPES } from '../../../constants';
+import { withoutTimestamp } from '../../../util/testing';
+
 import { InMemoryStore } from '../InMemory';
 import { IAppendOnlyStore } from '../interfaces';
 
@@ -17,7 +19,7 @@ test('append', async (t: any) => {
   await store.append(streamId, data, 0);
 
   const stored = await store.readRecords(streamId);
-  t.deepEqual(stored, [
+  t.deepEqual(withoutTimestamp(stored), [
     { streamId, id: 1, version: 1, data: { foo: 1 } },
     { streamId, id: 2, version: 2, data: { bar: 2 } }
   ]);
@@ -35,7 +37,7 @@ test('injection', async (t: any) => {
 
   await store.append('dummy', [{ test: true }], 0);
   const values = await store.readRecords('dummy');
-  t.deepEqual(values, [
+  t.deepEqual(withoutTimestamp(values), [
     { id: 1, streamId: 'dummy', version: 1, data: { test: true } }
   ]);
 });

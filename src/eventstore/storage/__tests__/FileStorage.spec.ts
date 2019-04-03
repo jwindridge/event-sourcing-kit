@@ -6,6 +6,8 @@ import uuid from 'uuid';
 import { Container } from 'inversify';
 
 import { FRAMEWORK_TYPES } from '../../../constants';
+import { withoutTimestamp } from '../../../util/testing';
+
 import { FileStore, FileStoreConfig, IFileStoreConfig } from '../FileStorage';
 import { IAppendOnlyStore } from '../interfaces';
 
@@ -62,7 +64,7 @@ test('append & retrieve', async t => {
 
   const stored = await store.readRecords(id);
 
-  t.deepEqual(stored, expectedResult(0));
+  t.deepEqual(withoutTimestamp(stored), expectedResult(0));
 });
 
 test('throws concurrency error', async t => {
@@ -88,7 +90,7 @@ test('retrieve after version', async t => {
 
   const storedAfter30 = await store.readRecords(id, 30);
   t.is(storedAfter30.length, results.length - 30);
-  t.deepEqual(storedAfter30, results.slice(30));
+  t.deepEqual(withoutTimestamp(storedAfter30), results.slice(30));
 });
 
 test('retrieve segment', async t => {
@@ -100,7 +102,10 @@ test('retrieve segment', async t => {
 
   const storedBetween20And45 = await store.readRecords(id, 20, 25);
   t.is(storedBetween20And45.length, 25);
-  t.deepEqual(storedBetween20And45, results.slice(20).slice(0, 25));
+  t.deepEqual(
+    withoutTimestamp(storedBetween20And45),
+    results.slice(20).slice(0, 25)
+  );
 });
 
 test('retrieve all', async t => {
@@ -142,7 +147,7 @@ test('injection', async t => {
 
   await store.append('dummy', [{ test: true }], 0);
   const values = await store.readRecords('dummy');
-  t.deepEqual(values, [
+  t.deepEqual(withoutTimestamp(values), [
     { id: 1, streamId: 'dummy', version: 1, data: { test: true } }
   ]);
 });
@@ -163,5 +168,5 @@ test('id recovery', async t => {
   await secondStore.append(stream2Id, stream2Data, 0);
 
   const values = await store.readRecords(stream2Id);
-  t.deepEqual(values, expectedResult(stream1Data.length));
+  t.deepEqual(withoutTimestamp(values), expectedResult(stream1Data.length));
 });

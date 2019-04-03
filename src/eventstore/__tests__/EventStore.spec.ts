@@ -1,4 +1,5 @@
 import { test } from '../../__tests__/_helpers';
+import { withoutTimestamp } from '../../util/testing';
 
 import { createEvent } from '../../Event';
 
@@ -29,7 +30,7 @@ test('loadEvents', async t => {
 
   const streamEvents = await eventStore.loadEvents(aggregateId);
 
-  t.deepEqual(streamEvents, [
+  t.deepEqual(withoutTimestamp(streamEvents), [
     {
       aggregate: aggregateId,
       data: { by: 2 },
@@ -60,7 +61,7 @@ test('loadAllEvents', async t => {
 
   const allEvents = await eventStore.loadAllEvents();
 
-  t.deepEqual(allEvents, [
+  t.deepEqual(withoutTimestamp(allEvents), [
     {
       aggregate: aggregate1,
       data: { msg: 'text' },

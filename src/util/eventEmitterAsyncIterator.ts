@@ -8,7 +8,7 @@ const debug = debugModule('eskit:util');
 
 type ResolveFunc<T> = (value: T) => void;
 
-export function eventEmitterAsyncIterator<T>(
+export default function eventEmitterAsyncIterator<T>(
   this: void,
   eventEmitter: EventEmitter,
   eventsNames: string | string[],
