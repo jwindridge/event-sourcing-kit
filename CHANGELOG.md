@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="0.5.0"></a>
+# [0.5.0](https://github.com/authentik8/event-sourcing-kit/compare/v0.4.1...v0.5.0) (2019-04-03)
+
+
+* Release v0.4.0 (#7) ([8b32314](https://github.com/authentik8/event-sourcing-kit/commit/8b32314)), closes [#7](https://github.com/authentik8/event-sourcing-kit/issues/7)
+
+
+### Features
+
+* Expose commands on AggregateRoot ([9b50098](https://github.com/authentik8/event-sourcing-kit/commit/9b50098))
+
+
+### BREAKING CHANGES
+
+* Changed package name to `eskit`
+* Changed names of a number of imports
+
+
+
 <a name="0.4.1"></a>
 ## [0.4.1](https://github.com/authentik8/event-sourcing-kit/compare/v0.4.0...v0.4.1) (2019-03-27)
 
