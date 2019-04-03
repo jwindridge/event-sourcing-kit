@@ -48,6 +48,9 @@ abstract class SQLProjection implements IProjection {
   // Storage for current position
   private _positionStore: IProjectionPositionStore;
 
+  // Boolean flag indicating whether this projection has been started
+  private _started: boolean = false;
+
   constructor(
     @inject(FRAMEWORK_TYPES.projections.KnexClient) knex: Knex,
     @inject(FRAMEWORK_TYPES.eventstore.EventStore) store: IEventStore,
@@ -71,6 +74,8 @@ abstract class SQLProjection implements IProjection {
    * Start the projection:
    */
   public async start(): Promise<void> {
+    this._started = true;
+
     // Connect event handler
     // For as long as we don't call "next", this will buffer events while reconstituting projection state
     const eventStream = eventEmitterAsyncIterator<IAggregateEvent>(
@@ -98,6 +103,14 @@ abstract class SQLProjection implements IProjection {
     }
 
     this._bindEventStream(eventStream);
+  }
+
+  // Promise that will resolve once the projection is up to date
+  public async ready(): Promise<void> {
+    if (!this._started) {
+      return this.start();
+    }
+    return Promise.resolve();
   }
 
   /**
