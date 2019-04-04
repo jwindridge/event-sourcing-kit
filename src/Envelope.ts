@@ -19,8 +19,6 @@ export const newMessage = <T extends IAggregateCommand | IAggregateEvent>(
     metadata: {
       causationId,
       correlationId
-    },
-    withCorrelationId: id =>
-      newMessage(payload, { causationId, correlationId: id })
+    }
   };
 };

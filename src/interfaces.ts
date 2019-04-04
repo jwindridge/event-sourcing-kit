@@ -68,13 +68,8 @@ export interface IMessageMetadata {
 
 export interface IEnvelope<M extends IAggregateCommand | IAggregateEvent> {
   payload: M;
-  id?: string;
+  id: string;
   metadata: IMessageMetadata;
-  /**
-   *
-   * @param id Correlation id to use for this message envelope
-   */
-  withCorrelationId(id: string): IEnvelope<M>;
 }
 
 /**
