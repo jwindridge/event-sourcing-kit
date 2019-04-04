@@ -37,6 +37,9 @@ export interface IAggregateIdentifier {
 export interface IAggregateCommand extends IDomainCommand {
   // Identifier for the aggregate this event addresses
   aggregate: IAggregateIdentifier;
+
+  // User initiating this command
+  userId?: string;
 }
 
 export interface IAggregateEvent extends IDomainEvent {
@@ -48,26 +51,25 @@ export interface IAggregateEvent extends IDomainEvent {
 
   // Version of the aggregate stream at the point of this event
   version: number;
+
+  // Timestamp (ms) of when this event was captured by the system
+  timestamp: number;
 }
 
 export interface IMessageMetadata {
+  // Unique identifier for a sequence of commands / events that should
+  // be associated with one action
   correlationId: string;
+
+  // Unique identifier for the command / event that resulted in the object
+  // associated with this metadata payload
   causationId: string;
 }
 
-/**
- * Envelope wrapping the transport of information
- */
-export interface IEnvelope<M extends IAggregateCommand | IDomainEvent> {
+export interface IEnvelope<M extends IAggregateCommand | IAggregateEvent> {
   payload: M;
-  id?: string;
-  userId?: string;
+  id: string;
   metadata: IMessageMetadata;
-  /**
-   *
-   * @param id Correlation id to use for this message envelope
-   */
-  withCorrelationId(id: string): IEnvelope<M>;
 }
 
 /**
@@ -147,6 +149,11 @@ export interface IAggregateRoot<T> {
    * Name of this aggregate root (unique within context)
    */
   name: string;
+
+  /**
+   * Commands exposed by this aggregate root
+   */
+  commands: string[];
 
   /**
    * Initial aggregate state

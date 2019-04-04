@@ -17,4 +17,5 @@ export interface IStreamData {
   streamId: string;
   version: number;
   data: any;
+  timestamp: number;
 }

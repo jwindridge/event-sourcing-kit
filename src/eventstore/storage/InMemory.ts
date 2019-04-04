@@ -69,6 +69,7 @@ export class InMemoryStore implements IAppendOnlyStore {
     data,
     streamId,
     id: this._nextId!++,
+    timestamp: new Date().getTime(),
     version: offset + index + 1
   });
 }

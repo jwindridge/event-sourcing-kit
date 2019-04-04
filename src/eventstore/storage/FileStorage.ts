@@ -129,12 +129,12 @@ export class FileStore implements IAppendOnlyStore {
     data,
     streamId,
     id: this._nextId!++,
+    timestamp: new Date().getTime(),
     version: offset + index + 1
   });
 
   private _parseRecord(encoded: string): IStreamData {
-    const { data, id, streamId, version } = JSON.parse(encoded);
-    return { data, id, streamId, version };
+    return JSON.parse(encoded) as IStreamData;
   }
 
   private _encode(records: IStreamData[]): string {

@@ -2,6 +2,54 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="0.6.2"></a>
+## [0.6.2](https://github.com/authentik8/event-sourcing-kit/compare/v0.6.1...v0.6.2) (2019-04-04)
+
+
+
+<a name="0.6.1"></a>
+## [0.6.1](https://github.com/authentik8/event-sourcing-kit/compare/v0.6.0...v0.6.1) (2019-04-03)
+
+
+### Features
+
+* Add SQLProjection.ready() function ([e5e0800](https://github.com/authentik8/event-sourcing-kit/commit/e5e0800))
+
+
+
+<a name="0.6.0"></a>
+# [0.6.0](https://github.com/authentik8/event-sourcing-kit/compare/v0.5.1...v0.6.0) (2019-04-03)
+
+
+### Features
+
+* Refactor command & query envelopes ([2ead391](https://github.com/authentik8/event-sourcing-kit/commit/2ead391))
+
+
+
+<a name="0.5.1"></a>
+## [0.5.1](https://github.com/authentik8/event-sourcing-kit/compare/v0.5.0...v0.5.1) (2019-04-03)
+
+
+
+<a name="0.5.0"></a>
+# [0.5.0](https://github.com/authentik8/event-sourcing-kit/compare/v0.4.1...v0.5.0) (2019-04-03)
+
+
+* Release v0.4.0 (#7) ([8b32314](https://github.com/authentik8/event-sourcing-kit/commit/8b32314)), closes [#7](https://github.com/authentik8/event-sourcing-kit/issues/7)
+
+
+### Features
+
+* Expose commands on AggregateRoot ([9b50098](https://github.com/authentik8/event-sourcing-kit/commit/9b50098))
+
+
+### BREAKING CHANGES
+
+* Changed package name to `eskit`
+* Changed names of a number of imports
+
+
 <a name="0.4.1"></a>
 ## [0.4.1](https://github.com/authentik8/event-sourcing-kit/compare/v0.4.0...v0.4.1) (2019-03-27)
 

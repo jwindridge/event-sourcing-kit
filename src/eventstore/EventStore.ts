@@ -96,9 +96,9 @@ class EventStore extends EventEmitter implements IEventStore {
    * @returns Application event
    */
   private _convertToEvent: (data: IStoredEvent) => IAggregateEvent = data => {
-    const { id, streamId, version, data: domainEvent } = data;
+    const { id, streamId, timestamp, version, data: domainEvent } = data;
     const aggregate = this._getAggregateId(streamId);
-    return createAggregateEvent(aggregate, domainEvent, id, version);
+    return createAggregateEvent(aggregate, domainEvent, id, version, timestamp);
   };
 }
 

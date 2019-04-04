@@ -14,7 +14,7 @@ import {
 } from './interfaces';
 import { buildTable } from './util';
 
-const debug = debugModule('eskit:SQLProjection');
+const debug = debugModule('eskit:projections:SQLProjection');
 const BEGINNING = 0;
 
 /**
@@ -22,7 +22,6 @@ const BEGINNING = 0;
  */
 @injectable()
 abstract class SQLProjection implements IProjection {
-
   // Definition of the table schema associated with this projection
   protected abstract schema: ITableDefinition;
 
@@ -49,6 +48,9 @@ abstract class SQLProjection implements IProjection {
   // Storage for current position
   private _positionStore: IProjectionPositionStore;
 
+  // Boolean flag indicating whether this projection has been started
+  private _started: boolean = false;
+
   constructor(
     @inject(FRAMEWORK_TYPES.projections.KnexClient) knex: Knex,
     @inject(FRAMEWORK_TYPES.eventstore.EventStore) store: IEventStore,
@@ -72,6 +74,8 @@ abstract class SQLProjection implements IProjection {
    * Start the projection:
    */
   public async start(): Promise<void> {
+    this._started = true;
+
     // Connect event handler
     // For as long as we don't call "next", this will buffer events while reconstituting projection state
     const eventStream = eventEmitterAsyncIterator<IAggregateEvent>(
@@ -81,6 +85,7 @@ abstract class SQLProjection implements IProjection {
         immediateSubscribe: true
       }
     );
+    debug(`Created generator from event emitter: ${eventStream}`);
 
     // Initialise SQL storage
     await this._ensureTable(this._knex);
@@ -98,6 +103,14 @@ abstract class SQLProjection implements IProjection {
     }
 
     this._bindEventStream(eventStream);
+  }
+
+  // Promise that will resolve once the projection is up to date
+  public async ready(): Promise<void> {
+    if (!this._started) {
+      return this.start();
+    }
+    return Promise.resolve();
   }
 
   /**
@@ -187,7 +200,6 @@ abstract class SQLProjection implements IProjection {
 
     // Set the collection attribute on the projection
     this._collection = db(tableName);
-
   }
 
   /**
@@ -214,7 +226,9 @@ abstract class SQLProjection implements IProjection {
     eventStream: AsyncIterableIterator<IAggregateEvent>
   ) {
     // Connect the `apply` method to the stream of events produced by the event store
+    debug('Binding to event stream');
     for await (const event of eventStream) {
+      debug(`Received event from stream: ${event}`);
       await this.apply(event);
     }
   }
