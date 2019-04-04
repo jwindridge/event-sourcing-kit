@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="0.6.7"></a>
+## [0.6.7](https://github.com/authentik8/event-sourcing-kit/compare/v0.6.6...v0.6.7) (2019-04-04)
+
+
+
 <a name="0.6.6"></a>
 ## [0.6.6](https://github.com/authentik8/event-sourcing-kit/compare/v0.6.5...v0.6.6) (2019-04-04)
 
