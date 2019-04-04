@@ -156,15 +156,17 @@ abstract class SQLProjection implements IProjection {
   public async rebuild(): Promise<void> {
     // Drop the projection table if it exists
     await this._knex.schema.dropTableIfExists(this.schema.name);
-    debug(`Dropped table "${this.schema.name}"`);
+    debug(`${this.constructor.name}: Dropped table "${this.schema.name}"`);
 
     // Reset our saved position to 0
     await this.updateSavedPosition(BEGINNING);
-    debug(`Reset projection position to ${BEGINNING}`);
+    debug(
+      `${this.constructor.name}: Reset projection position to ${BEGINNING}`
+    );
 
     // Restart the projection
     await this.start();
-    debug('Started projection');
+    debug(`${this.constructor.name}: Started projection`);
   }
 
   /**
@@ -213,9 +215,13 @@ abstract class SQLProjection implements IProjection {
    * @returns Promise that resolves once all events have been applied
    */
   private async _applyEventsSince(position: number): Promise<void> {
-    debug(`Retrieving events since event #${position}`);
+    debug(
+      `${this.constructor.name}: Retrieving events since event #${position}`
+    );
     const unprocessedEvents = await this._store.loadAllEvents(position);
-    debug(`Applying ${unprocessedEvents.length} events`);
+    debug(
+      `${this.constructor.name}: Applying ${unprocessedEvents.length} events`
+    );
     for (const event of unprocessedEvents) {
       try {
         await this.apply(event);
@@ -231,7 +237,7 @@ abstract class SQLProjection implements IProjection {
     eventStream: AsyncIterableIterator<IAggregateEvent>
   ) {
     // Connect the `apply` method to the stream of events produced by the event store
-    debug('Binding to event stream');
+    debug(`${this.constructor.name}: Binding to event stream`);
     for await (const event of eventStream) {
       await this.apply(event);
     }
