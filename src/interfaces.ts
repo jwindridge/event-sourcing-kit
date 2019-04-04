@@ -80,7 +80,9 @@ export interface IMessageMetadata {
   causationId: string;
 }
 
-export interface IEnvelope<M extends IAggregateCommand | IAggregateEvent> {
+export interface IEnvelope<
+  M extends IAggregateCommand | IApplicationCommand | IAggregateEvent
+> {
   payload: M;
   id: string;
   metadata: IMessageMetadata;
