@@ -85,7 +85,6 @@ abstract class SQLProjection implements IProjection {
         immediateSubscribe: true
       }
     );
-    debug(`Created generator from event emitter: ${eventStream}`);
 
     // Initialise SQL storage
     await this._ensureTable(this._knex);
@@ -121,11 +120,15 @@ abstract class SQLProjection implements IProjection {
   public async apply(event: IAggregateEvent): Promise<void> {
     const eventType = `${event.aggregate.name}.${event.name}`.toLowerCase();
 
-    debug(`Apply event ${eventType}: ${JSON.stringify(event)}`);
-
     const handler = this.eventHandlers[eventType];
 
     if (handler !== undefined) {
+      debug(
+        `${this.constructor.name}: Apply event ${eventType}: ${JSON.stringify(
+          event
+        )}`
+      );
+
       // If this projection cares about the event, apply the handler
       try {
         await handler(this.collection!, event);
@@ -137,7 +140,9 @@ abstract class SQLProjection implements IProjection {
         throw reason;
       }
     } else {
-      debug(`Unable to find handler for ${eventType}`);
+      debug(
+        `${this.constructor.name}: No event handler for ${eventType}, ignoring`
+      );
     }
 
     // Update the last known position of this projection
@@ -228,7 +233,6 @@ abstract class SQLProjection implements IProjection {
     // Connect the `apply` method to the stream of events produced by the event store
     debug('Binding to event stream');
     for await (const event of eventStream) {
-      debug(`Received event from stream: ${event}`);
       await this.apply(event);
     }
   }
