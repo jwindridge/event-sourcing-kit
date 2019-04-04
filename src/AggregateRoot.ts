@@ -37,7 +37,7 @@ export function createAggregateRoot<T>(
   const handle = async (
     entity: IAggregateState<T>,
     command: IDomainCommand,
-    services?: IServiceRegistry
+    services: IServiceRegistry
   ): Promise<IDomainEvent[]> => {
     const handler = commands[command.name];
 

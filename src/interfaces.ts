@@ -125,7 +125,7 @@ export interface ICommandHandlerMap<T> {
   [s: string]: (
     entity: IPublishableAggregateState<T>,
     command: IDomainCommand,
-    services?: IServiceRegistry
+    services: IServiceRegistry
   ) =>
     | void
     | Iterator<IPublishableAggregateState<T>>
