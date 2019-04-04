@@ -2,6 +2,48 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="0.6.3"></a>
+## [0.6.3](https://github.com/authentik8/event-sourcing-kit/compare/v0.6.2...v0.6.3) (2019-04-04)
+
+
+* Update stable branch to v0.4.1 (#8) ([721936b](https://github.com/authentik8/event-sourcing-kit/commit/721936b)), closes [#8](https://github.com/authentik8/event-sourcing-kit/issues/8) [#6](https://github.com/authentik8/event-sourcing-kit/issues/6)
+
+
+### BREAKING CHANGES
+
+* Changed package name to `eskit`
+
+* bug: InMemoryStore data storage
+
+InMemoryStore wasn't appending to `this._allData`, so `readAllRecords` always
+returned an empty array
+
+* test(infra/storage): Use typed Ava contexts
+
+* chore: Update package name in package-lock.json
+
+* test(infra): Add unit tests for EventStore
+
+* Add types declaration for "@elastic.io/amqp-rpc"
+
+* Add amqp dependencies
+
+* Improve domain service registry injection pattern
+
+* Replace servicebus implementation with amqp-rpc
+
+* Add rudimentary implementation of RPC Command Adapter
+
+* Fix minor typos & formattting
+
+* Make type parameter of RpcCommandAdapter generic
+
+* Add `AggregateRepository.getNextId` functionality
+
+* Simplify interface for RpcCommandAdapter
+
+
+
 <a name="0.6.2"></a>
 ## [0.6.2](https://github.com/authentik8/event-sourcing-kit/compare/v0.6.1...v0.6.2) (2019-04-04)
 
