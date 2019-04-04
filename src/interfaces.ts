@@ -4,6 +4,9 @@ import { IEventPublisher } from './messaging/interfaces';
 
 export { IEventPublisher };
 
+type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
 export interface IDomainCommand {
   // Name of the command
   name: string;
@@ -40,6 +43,17 @@ export interface IAggregateCommand extends IDomainCommand {
 
   // User initiating this command
   userId?: string;
+}
+
+/**
+ * Application Command interface
+ *
+ * Used at perimiter of application to allow clients to call aggregate commands
+ * that generate a new instance without specifying the id
+ */
+export interface IApplicationCommand extends IDomainCommand {
+  aggregate: PartialBy<IAggregateIdentifier, 'id'>;
+  userId: string;
 }
 
 export interface IAggregateEvent extends IDomainEvent {
