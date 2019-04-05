@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="0.7.1"></a>
+## [0.7.1](https://github.com/authentik8/event-sourcing-kit/compare/v0.7.0...v0.7.1) (2019-04-05)
+
+
+### Features
+
+* Add `ApplicationService` abstract class ([32f46ee](https://github.com/authentik8/event-sourcing-kit/commit/32f46ee))
+
+
+
 <a name="0.7.0"></a>
 # [0.7.0](https://github.com/authentik8/event-sourcing-kit/compare/v0.6.7...v0.7.0) (2019-04-05)
 
