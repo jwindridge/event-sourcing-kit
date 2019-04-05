@@ -56,6 +56,20 @@ export interface IApplicationCommand extends IDomainCommand {
   userId: string;
 }
 
+export interface IApplicationService {
+  /**
+   * Apply a command to the aggregates managed by this service
+   *
+   * If called with `IApplicationCommand`, the service should generate an aggregate identifier
+   *
+   * @param command Command object including target aggregate, method & associated data
+   * @returns { id: string } Object indicating the identifier of the aggregate that handled the command
+   */
+  applyCommand(
+    command: IApplicationCommand | IAggregateCommand
+  ): Promise<{ id: string }>;
+}
+
 export interface IAggregateEvent extends IDomainEvent {
   // Identifier for the aggregate this event corresponds to
   aggregate: IAggregateIdentifier;
