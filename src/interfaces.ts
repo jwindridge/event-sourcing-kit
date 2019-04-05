@@ -4,6 +4,9 @@ import { IEventPublisher } from './messaging/interfaces';
 
 export { IEventPublisher };
 
+type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
+type PartialBy<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+
 export interface IDomainCommand {
   // Name of the command
   name: string;
@@ -42,6 +45,37 @@ export interface IAggregateCommand extends IDomainCommand {
   userId?: string;
 }
 
+/**
+ * Application Command interface
+ *
+ * Used at perimiter of application to allow clients to call aggregate commands
+ * that generate a new instance without specifying the id
+ */
+export interface IApplicationCommand extends IDomainCommand {
+  aggregate: PartialBy<IAggregateIdentifier, 'id'>;
+  userId: string;
+}
+
+export interface IApplicationService {
+  /**
+   * Do any required pre-launch setup of resources
+   * @returns Promise that resolves once prelaunch setup complete
+   */
+  start(): Promise<void>;
+
+  /**
+   * Apply a command to the aggregates managed by this service
+   *
+   * If called with `IApplicationCommand`, the service should generate an aggregate identifier
+   *
+   * @param command Command object including target aggregate, method & associated data
+   * @returns { id: string } Object indicating the identifier of the aggregate that handled the command
+   */
+  applyCommand(
+    command: IApplicationCommand | IAggregateCommand
+  ): Promise<{ id: string }>;
+}
+
 export interface IAggregateEvent extends IDomainEvent {
   // Identifier for the aggregate this event corresponds to
   aggregate: IAggregateIdentifier;
@@ -66,7 +100,9 @@ export interface IMessageMetadata {
   causationId: string;
 }
 
-export interface IEnvelope<M extends IAggregateCommand | IAggregateEvent> {
+export interface IEnvelope<
+  M extends IAggregateCommand | IApplicationCommand | IAggregateEvent
+> {
   payload: M;
   id: string;
   metadata: IMessageMetadata;
@@ -109,7 +145,7 @@ export interface ICommandHandlerMap<T> {
   [s: string]: (
     entity: IPublishableAggregateState<T>,
     command: IDomainCommand,
-    services?: IServiceRegistry
+    services: IServiceRegistry
   ) =>
     | void
     | Iterator<IPublishableAggregateState<T>>
