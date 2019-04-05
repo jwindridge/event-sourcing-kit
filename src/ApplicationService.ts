@@ -1,3 +1,4 @@
+import debugModule from 'debug';
 import uuid from 'uuid';
 import {
   IAggregateCommand,
@@ -9,13 +10,17 @@ import {
   IServiceRegistry
 } from './interfaces';
 
-abstract class ApplicationService implements IApplicationService {
-  public abstract aggregates: { [s: string]: IAggregateRoot<any> };
+const debug = debugModule('eskit:ApplicationService');
 
-  protected _serviceRegistry: IServiceRegistry;
-  protected _repositories: {
+abstract class ApplicationService implements IApplicationService {
+  protected abstract aggregates: { [s: string]: IAggregateRoot<any> } = {};
+  protected serviceRegistry: IServiceRegistry;
+
+  protected repositories?: {
     [s: string]: IRepository<any>;
   };
+
+  private _repositoryFactory: IRepositoryFactory;
 
   constructor({
     serviceRegistry,
@@ -24,12 +29,19 @@ abstract class ApplicationService implements IApplicationService {
     serviceRegistry: IServiceRegistry;
     repositoryFactory: IRepositoryFactory;
   }) {
-    this._serviceRegistry = serviceRegistry;
-    this._repositories = this._configureRepositories(repositoryFactory);
+    debug('Initialise ApplicationService');
+    this.serviceRegistry = serviceRegistry;
+    this._repositoryFactory = repositoryFactory;
+
+    this.start.bind(this);
+    this.applyCommand.bind(this);
+    this._configureRepositories.bind(this);
   }
 
   public async start() {
-    // Do any pre-launch setup here
+    debug(`${this.constructor.name}: Start ApplicationService`);
+    // Do any additional pre-launch setup here
+    this._configureRepositories();
   }
 
   /**
@@ -51,7 +63,7 @@ abstract class ApplicationService implements IApplicationService {
     const id = aggregate.id || uuid.v4();
 
     // Retrieve the repository using the aggregate name
-    const repository = this._repositories[name];
+    const repository = this.repositories![name];
 
     // Load the current state of the entity by replaying events
     const entity = await repository.getById(id);
@@ -61,7 +73,7 @@ abstract class ApplicationService implements IApplicationService {
     const events = await aggregateRoot.applyCommand(
       entity,
       command,
-      this._serviceRegistry
+      this.serviceRegistry
     );
 
     // Save the events emitted from the aggregate instance to the repository
@@ -87,11 +99,16 @@ abstract class ApplicationService implements IApplicationService {
    * @param factory Repository factory
    * @returns Map of aggregate names to corresponding repository instances
    */
-  private _configureRepositories(factory: IRepositoryFactory) {
-    return Object.assign(
+  private _configureRepositories() {
+    debug(
+      `${this.constructor.name}: Configure repositories for aggregates: ${[
+        ...Object.keys(this.aggregates)
+      ]}`
+    );
+    this.repositories = Object.assign(
       {},
       ...Object.entries(this.aggregates).map(([name, root]) => ({
-        [name]: factory.createRepository(root)
+        [name]: this._repositoryFactory.createRepository(root)
       }))
     );
   }
