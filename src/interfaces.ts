@@ -141,15 +141,18 @@ export interface IPublishableAggregateState<T> extends IAggregateState<T> {
 /**
  * Map of command names to their respective handlers
  */
+
+export type CommandHandler<T> = (
+  entity: IPublishableAggregateState<T>,
+  command: IDomainCommand,
+  services: IServiceRegistry
+) =>
+  | void
+  | Iterator<IPublishableAggregateState<T>>
+  | AsyncIterator<IPublishableAggregateState<T>>;
+
 export interface ICommandHandlerMap<T> {
-  [s: string]: (
-    entity: IPublishableAggregateState<T>,
-    command: IDomainCommand,
-    services: IServiceRegistry
-  ) =>
-    | void
-    | Iterator<IPublishableAggregateState<T>>
-    | AsyncIterator<IPublishableAggregateState<T>>;
+  [s: string]: CommandHandler<T> | Array<CommandHandler<T>>;
 }
 
 /**

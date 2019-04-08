@@ -27,7 +27,18 @@ const definition: IAggregateDefinition<ICounter> = {
       for (const step of command.data.steps) {
         yield entity.publish('incrementedBy', { step });
       }
-    }
+    },
+    arrayIncrements: [
+      (entity, _) => {
+        entity.publish('incremented');
+      },
+      (entity, _) => {
+        entity.publish('incremented');
+      },
+      (entity, _) => {
+        entity.publish('incrementedBy', { step: entity.state.value + 2 });
+      }
+    ]
   },
   initialState: {
     value: 0
@@ -104,4 +115,16 @@ test('asynchronous yielding', async t => {
 
   t.is(events.length, 1);
   t.deepEqual(events, [createEvent('incremented')]);
+});
+
+test('multiple command handlers', async t => {
+  const initial = counterAggregate.initialState;
+  const arrayIncrement = createCommand('arrayIncrements', 0);
+  const events = await counterAggregate.applyCommand(initial, arrayIncrement);
+  t.is(events.length, 3);
+  t.deepEqual(events, [
+    createEvent('incremented'),
+    createEvent('incremented'),
+    createEvent('incrementedBy', { step: 4 })
+  ]);
 });
