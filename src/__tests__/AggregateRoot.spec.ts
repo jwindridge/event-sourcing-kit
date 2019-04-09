@@ -1,6 +1,9 @@
 import test from 'ava';
+import Joi from 'joi';
+
 import { createAggregateRoot } from '../AggregateRoot';
-import { createCommand } from '../Command';
+import { createCommand, createCommandValidator } from '../Command';
+import { CommandValidationError, DomainError } from '../errors';
 import { createEvent } from '../Event';
 import { IAggregateDefinition } from '../interfaces';
 
@@ -16,18 +19,6 @@ const definition: IAggregateDefinition<ICounter> = {
       entity = yield entity.publish('incremented');
       yield entity.publish('incrementedBy', { step: entity.state.value });
     },
-    async *delayedIncrement(entity, _) {
-      await timeout(25);
-      yield entity.publish('incremented');
-    },
-    increment(entity, _) {
-      entity.publish('incremented');
-    },
-    *incrementByDynamic(entity, command) {
-      for (const step of command.data.steps) {
-        yield entity.publish('incrementedBy', { step });
-      }
-    },
     arrayIncrements: [
       (entity, _) => {
         entity.publish('incremented');
@@ -37,6 +28,29 @@ const definition: IAggregateDefinition<ICounter> = {
       },
       (entity, _) => {
         entity.publish('incrementedBy', { step: entity.state.value + 2 });
+      }
+    ],
+    async *delayedIncrement(entity, _) {
+      await timeout(25);
+      yield entity.publish('incremented');
+    },
+    increment(entity, _) {
+      entity.publish('incremented');
+    },
+    incrementByPositive(entity, { data: { step } }) {
+      if (step <= 0) {
+        throw new DomainError('Must increment by positive number');
+      }
+      entity.publish('incrementedBy', { step });
+    },
+    incrementByDynamic: [
+      createCommandValidator({
+        steps: Joi.array().items(Joi.number().integer())
+      }),
+      function* incrementByDynamic(entity, command) {
+        for (const step of command.data.steps) {
+          yield entity.publish('incrementedBy', { step });
+        }
       }
     ]
   },
@@ -69,6 +83,14 @@ test('simple command handler', async t => {
   t.is(events.length, 1);
 });
 
+test('handle domain error', async t => {
+  const command = createCommand('incrementByPositive', 0, { step: -2 });
+  const shouldThrow = () =>
+    counterAggregate.applyCommand(counterAggregate.initialState, command);
+
+  await t.throwsAsync(shouldThrow, { name: 'DomainError' });
+});
+
 test('multiple yielding command handler', async t => {
   const incrementedByDynamic = createCommand('incrementByDynamic', 0, {
     steps: [1, 2, 3, 4]
@@ -86,6 +108,16 @@ test('multiple yielding command handler', async t => {
     createEvent('incrementedBy', { step: 3 }),
     createEvent('incrementedBy', { step: 4 })
   ]);
+});
+
+test('command validation', async t => {
+  const badCommand = createCommand('incrementByDynamic', 0, { steps: 'foo' });
+  const shouldThrow = () =>
+    counterAggregate.applyCommand(counterAggregate.initialState, badCommand);
+
+  await t.throwsAsync(shouldThrow, {
+    instanceOf: CommandValidationError
+  });
 });
 
 test('stateful multiple yielding', async t => {

@@ -34,7 +34,7 @@ export function createAggregateRoot<T>(
     };
   };
 
-  const handle = async (
+  const applyCommand = async (
     entity: IAggregateState<T>,
     command: IDomainCommand,
     services: IServiceRegistry
@@ -89,10 +89,10 @@ export function createAggregateRoot<T>(
   }
 
   return {
+    applyCommand,
     applyEvent,
     initialState,
     rehydrate,
-    applyCommand: handle,
     commands: Object.keys(commands).map(cmd => cmd.toLowerCase()),
     name: aggregateName.toLowerCase()
   };

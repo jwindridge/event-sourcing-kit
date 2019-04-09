@@ -4,7 +4,7 @@ export * from './errors';
 
 import { createAggregateRoot } from './AggregateRoot';
 import ApplicationService from './ApplicationService';
-import { createCommand } from './Command';
+import { createCommand, createCommandValidator } from './Command';
 import { newMessage } from './Envelope';
 import { createAggregateEvent, createEvent } from './Event';
 import EventStoreTailingPublisher from './EventStoreTailingPublisher';
@@ -16,6 +16,7 @@ export {
   createAggregateEvent,
   createAggregateRoot,
   createCommand,
+  createCommandValidator,
   createEvent,
   EventStoreTailingPublisher,
   newMessage,
