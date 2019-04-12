@@ -147,6 +147,7 @@ export type CommandHandler<T> = (
   services: IServiceRegistry
 ) =>
   | void
+  | Promise<void>
   | Iterator<IPublishableAggregateState<T>>
   | AsyncIterator<IPublishableAggregateState<T>>;
 
