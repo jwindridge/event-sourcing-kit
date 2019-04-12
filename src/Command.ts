@@ -6,11 +6,13 @@ import { CommandHandler, IDomainCommand } from './interfaces';
 export function createCommand(
   name: string,
   version: number,
-  data?: object
+  data?: object,
+  userId?: string
 ): IDomainCommand {
   return {
     data,
     name,
+    userId,
     version
   };
 }
