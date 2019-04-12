@@ -30,8 +30,11 @@ const definition: IAggregateDefinition<ICounter> = {
         entity.publish('incrementedBy', { step: entity.state.value + 2 });
       }
     ],
-    async delayedIncrement(entity, _) {
+    async delayedIncrement(entity, { data }) {
       await timeout(25);
+      if (data && data.step && data.step < 0) {
+        throw new DomainError('Increment step must be postiive');
+      }
       entity.publish('incremented');
     },
     async *delayedYieldingIncrement(entity, _) {
@@ -151,6 +154,15 @@ test('asynchronous commands', async t => {
 
   t.is(events.length, 1);
   t.deepEqual(events, [createEvent('incremented')]);
+});
+
+test('asynchronous error handling', async t => {
+  const initial = counterAggregate.initialState;
+  const delayedIncrement = createCommand('delayedIncrement', 0, { step: -1 });
+
+  const shouldThrow = counterAggregate.applyCommand(initial, delayedIncrement);
+
+  await t.throwsAsync(shouldThrow, { instanceOf: DomainError });
 });
 
 test('asynchronous yielding command handler', async t => {
