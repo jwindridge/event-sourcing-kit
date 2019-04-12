@@ -61,7 +61,7 @@ export function createAggregateRoot<T>(
       : [commandHandlerMapEntry];
 
     const _apply = async (fn: any) => {
-      const generator = fn(instance, command, services);
+      const generator = await Promise.resolve(fn(instance, command, services));
 
       // Handler method can either call `entity.publish` directly & return void,
       // or it can be a generator, in which case we need to iterate through all
