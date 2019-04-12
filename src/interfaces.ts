@@ -14,6 +14,9 @@ export interface IDomainCommand {
   // Parameters associated with this command
   data?: any;
 
+  // User initiating this command
+  userId?: string;
+
   // Expected version of the aggregate
   version: number;
 }
@@ -40,9 +43,6 @@ export interface IAggregateIdentifier {
 export interface IAggregateCommand extends IDomainCommand {
   // Identifier for the aggregate this event addresses
   aggregate: IAggregateIdentifier;
-
-  // User initiating this command
-  userId?: string;
 }
 
 /**
@@ -53,7 +53,6 @@ export interface IAggregateCommand extends IDomainCommand {
  */
 export interface IApplicationCommand extends IDomainCommand {
   aggregate: PartialBy<IAggregateIdentifier, 'id'>;
-  userId: string;
 }
 
 export interface IApplicationService {
