@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="1.3.0"></a>
+# [1.3.0](https://github.com/authentik8/event-sourcing-kit/compare/v1.2.5...v1.3.0) (2019-04-17)
+
+
+### Features
+
+* Add hook for user id retrieval ([a02c876](https://github.com/authentik8/event-sourcing-kit/commit/a02c876))
+
+
+
 <a name="1.2.5"></a>
 ## [1.2.5](https://github.com/authentik8/event-sourcing-kit/compare/v1.2.4...v1.2.5) (2019-04-12)
 
