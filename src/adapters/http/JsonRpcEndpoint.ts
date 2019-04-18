@@ -1,3 +1,4 @@
+import debugModule from 'debug';
 import { DomainError } from '../../errors';
 import { IApplicationCommand, IEnvelope } from '../../interfaces';
 import {
@@ -10,6 +11,8 @@ import {
   IJsonRpcResponse,
   IJsonRpcResultResponse
 } from './interfaces';
+
+const debug = debugModule('eskit:adapters:http:JsonRpcEndpoint');
 
 const createErrorCodeGetter = (
   errorCodes: IErrorCodeMap | ErrorCodeGetter
@@ -27,7 +30,8 @@ const getDefaultHttpStatus = (e: IJsonRpcError): number => {
 export const createJsonRpcEndpoint: IJsonRpcEndpointConstructor = ({
   service,
   errorCodes,
-  getHttpStatus
+  getHttpStatus,
+  getUserIdFromRequest
 }) => async (req, res) => {
   const {
     id, // Command id
@@ -35,8 +39,20 @@ export const createJsonRpcEndpoint: IJsonRpcEndpointConstructor = ({
     params: { aggregate, version, data } // Command parameters
   } = req.body as IJsonRpcAggregateCommand;
 
+  debug(
+    `Received command ${id}: ${method}: ${aggregate}@${version} - ${JSON.stringify(
+      data
+    )}`
+  );
+
+  debug(`Request local variables: ${JSON.stringify(res.locals)}`);
+
   // Parsed from JWT in authentication middleware
-  const userId = res.locals.userId;
+  const userId =
+    getUserIdFromRequest &&
+    (await Promise.resolve(getUserIdFromRequest(req, res)));
+
+  debug(`User id from request: ${userId}`);
 
   // JSON-RPC method name is a dot-delimited combination of aggregate & command names
   const [aggregateName, commandName] = method.split('.');
@@ -59,6 +75,8 @@ export const createJsonRpcEndpoint: IJsonRpcEndpointConstructor = ({
       name: commandName
     }
   };
+
+  debug(`Command envelope: ${JSON.stringify(envelope)}`);
 
   const response: Partial<IJsonRpcResponse> = { id, jsonrpc: '2.0' };
 

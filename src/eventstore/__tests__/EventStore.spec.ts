@@ -2,6 +2,7 @@ import { test } from '../../__tests__/_helpers';
 import { withoutTimestamp } from '../../util/testing';
 
 import { createEvent } from '../../Event';
+import { AppendOnlyStoreConcurrencyError } from '../storage';
 
 test('save', async t => {
   const { eventStore, publishedEvents, store } = t.context;
@@ -17,6 +18,18 @@ test('save', async t => {
 
   t.is(storedData.length, 1);
   t.deepEqual(publishedEvents, savedEvents);
+});
+
+test('save: wrong version', async t => {
+  const { eventStore } = t.context;
+  const events = [createEvent('incremented', { by: 2 })];
+
+  const aggregateId = { id: 'dummy', name: 'counter' };
+  const shouldThrow = () => eventStore.save(aggregateId, events, 10);
+
+  await t.throwsAsync(shouldThrow, {
+    instanceOf: AppendOnlyStoreConcurrencyError
+  });
 });
 
 test('loadEvents', async t => {

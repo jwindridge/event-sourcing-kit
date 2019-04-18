@@ -1,4 +1,4 @@
-import { RequestHandler } from 'express';
+import { Request, RequestHandler, Response } from 'express';
 import { IApplicationService } from '../../interfaces';
 
 /**
@@ -47,6 +47,7 @@ interface IRpcEndpointConstructorParams {
   service: IApplicationService;
   errorCodes: IErrorCodeMap | ErrorCodeGetter;
   getHttpStatus?: StatusCodeGetter;
+  getUserIdFromRequest?: (req: Request, res: Response) => string;
 }
 
 export type IJsonRpcEndpointConstructor = (
