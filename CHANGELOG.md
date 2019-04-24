@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="2.0.1"></a>
+## [2.0.1](https://github.com/authentik8/event-sourcing-kit/compare/v2.0.0...v2.0.1) (2019-04-24)
+
+
+### Bug Fixes
+
+* Remove unneeded servicebus dependency ([d699c8e](https://github.com/authentik8/event-sourcing-kit/commit/d699c8e))
+
+
+
 <a name="2.0.0"></a>
 # [2.0.0](https://github.com/authentik8/event-sourcing-kit/compare/v1.3.0...v2.0.0) (2019-04-24)
 
