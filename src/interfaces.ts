@@ -123,6 +123,7 @@ export interface IServiceRegistry {
  */
 export interface IAggregateState<T> {
   exists: boolean;
+  id: string;
   state: T;
   version: number;
 }
@@ -195,9 +196,9 @@ export interface IAggregateRoot<T> {
   commands: string[];
 
   /**
-   * Initial aggregate state
+   * Initial aggregate state factory
    */
-  initialState: IAggregateState<T>;
+  getInitialState: (id: string) => IAggregateState<T>;
 
   /**
    * Apply a domain event to an aggregate
@@ -226,11 +227,13 @@ export interface IAggregateRoot<T> {
   /**
    * Rehydrate an aggregate state from an events stream (onto a snapshot if provided)
    *
+   * @param id Aggregate identifier
    * @param events List of events to apply to this aggregate instance
    * @param [snapshot] Optional snapshotted aggregate state (to speed up instantiation)
    * @returns Current aggregate
    */
   rehydrate(
+    id: string,
     events: IDomainEvent[],
     snapshot?: IAggregateState<T>
   ): IAggregateState<T>;
