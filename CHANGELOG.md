@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="2.0.2"></a>
+## [2.0.2](https://github.com/authentik8/event-sourcing-kit/compare/v2.0.1...v2.0.2) (2019-04-24)
+
+
+### Bug Fixes
+
+* Don't change case of commands / events ([825e0da](https://github.com/authentik8/event-sourcing-kit/commit/825e0da))
+
+
+
 <a name="2.0.1"></a>
 ## [2.0.1](https://github.com/authentik8/event-sourcing-kit/compare/v2.0.0...v2.0.1) (2019-04-24)
 
