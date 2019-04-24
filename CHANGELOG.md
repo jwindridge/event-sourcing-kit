@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="2.0.0"></a>
+# [2.0.0](https://github.com/authentik8/event-sourcing-kit/compare/v1.3.0...v2.0.0) (2019-04-24)
+
+
+### Features
+
+* Add id to domain entity state ([b637fce](https://github.com/authentik8/event-sourcing-kit/commit/b637fce))
+
+
+### BREAKING CHANGES
+
+* `AggregateRoot` objects have had `initialState`
+replaced with `getInitialState(id: string)`
+
+
+
 <a name="1.3.0"></a>
 # [1.3.0](https://github.com/authentik8/event-sourcing-kit/compare/v1.2.5...v1.3.0) (2019-04-17)
 
