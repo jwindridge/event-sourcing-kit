@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="2.1.0"></a>
+# [2.1.0](https://github.com/authentik8/event-sourcing-kit/compare/v2.0.3...v2.1.0) (2019-04-26)
+
+
+### Features
+
+* **eventstore:** Allow storing of event metadata ([2bf6db3](https://github.com/authentik8/event-sourcing-kit/commit/2bf6db3))
+
+
+
 <a name="2.0.3"></a>
 ## [2.0.3](https://github.com/authentik8/event-sourcing-kit/compare/v2.0.2...v2.0.3) (2019-04-24)
 
