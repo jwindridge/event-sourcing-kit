@@ -16,8 +16,13 @@ import { IAppendOnlyStore, IStreamData } from './storage';
 
 const debug = debugModule('eskit:eventstore:EventStore');
 
+interface IEventWithMetadata {
+  event: IDomainEvent;
+  metadata?: object;
+}
+
 interface IStoredEvent extends IStreamData {
-  data: IDomainEvent;
+  data: IEventWithMetadata;
 }
 
 @injectable()
@@ -34,11 +39,23 @@ class EventStore extends EventEmitter implements IEventStore {
   public async save(
     agggregateId: IAggregateIdentifier,
     events: IDomainEvent[],
-    version: number
+    version: number,
+    metadata?: { [s: string]: any }
   ) {
     const streamId = this.getStreamId(agggregateId);
     debug(`Saving ${events.length} events to ${streamId}`);
-    const storedEvents = await this._storage.append(streamId, events, version);
+
+    const eventsWithMetadata: IEventWithMetadata[] = events.map(event => ({
+      event,
+      metadata
+    }));
+
+    const storedEvents = await this._storage.append(
+      streamId,
+      eventsWithMetadata,
+      version
+    );
+
     for (const event of storedEvents.map(this._convertToEvent)) {
       this.emit('saved', event);
     }
@@ -95,10 +112,20 @@ class EventStore extends EventEmitter implements IEventStore {
    * @param data: Stored data retrieved from `IAppendOnlyStore`
    * @returns Application event
    */
-  private _convertToEvent: (data: IStoredEvent) => IAggregateEvent = data => {
-    const { id, streamId, timestamp, version, data: domainEvent } = data;
+  private _convertToEvent: (data: IStoredEvent) => IAggregateEvent = ({
+    data: { event, metadata },
+    ...data
+  }) => {
+    const { id, streamId, timestamp, version } = data;
     const aggregate = this._getAggregateId(streamId);
-    return createAggregateEvent(aggregate, domainEvent, id, version, timestamp);
+    return createAggregateEvent(
+      aggregate,
+      event,
+      id,
+      version,
+      timestamp,
+      metadata
+    );
   };
 }
 

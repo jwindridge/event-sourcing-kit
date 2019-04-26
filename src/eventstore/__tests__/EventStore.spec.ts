@@ -32,6 +32,32 @@ test('save: wrong version', async t => {
   });
 });
 
+test('save: with metadata', async t => {
+  const { eventStore } = t.context;
+  const events = [createEvent('incremented', { by: 2 })];
+
+  const aggregateId = { id: 'dummy', name: 'counter' };
+
+  const metadata = {
+    userId: '123456'
+  };
+
+  await eventStore.save(aggregateId, events, 0, metadata);
+
+  const savedEvents = await eventStore.loadEvents(aggregateId);
+
+  t.deepEqual(withoutTimestamp(savedEvents), [
+    {
+      metadata,
+      aggregate: aggregateId,
+      data: { by: 2 },
+      id: 1,
+      name: 'incremented',
+      version: 1
+    }
+  ]);
+});
+
 test('loadEvents', async t => {
   const { eventStore } = t.context;
 
@@ -48,6 +74,7 @@ test('loadEvents', async t => {
       aggregate: aggregateId,
       data: { by: 2 },
       id: 1,
+      metadata: undefined,
       name: 'incremented',
       version: 1
     }
@@ -79,6 +106,7 @@ test('loadAllEvents', async t => {
       aggregate: aggregate1,
       data: { msg: 'text' },
       id: 1,
+      metadata: undefined,
       name: 'eventType1',
       version: 1
     },
@@ -86,6 +114,7 @@ test('loadAllEvents', async t => {
       aggregate: aggregate2,
       data: { msg: 'different text' },
       id: 2,
+      metadata: undefined,
       name: 'eventType2',
       version: 1
     },
@@ -93,6 +122,7 @@ test('loadAllEvents', async t => {
       aggregate: aggregate1,
       data: { x: 1 },
       id: 3,
+      metadata: undefined,
       name: 'eventType3',
       version: 2
     }

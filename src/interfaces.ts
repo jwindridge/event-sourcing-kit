@@ -87,6 +87,9 @@ export interface IAggregateEvent extends IDomainEvent {
 
   // Timestamp (ms) of when this event was captured by the system
   timestamp: number;
+
+  // Any additional metadata that should be saved to this event
+  metadata?: any;
 }
 
 export interface IMessageMetadata {
