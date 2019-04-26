@@ -25,9 +25,14 @@ class Repository<T> implements IRepository<T> {
     this._store = store;
   }
 
-  public async save(id: string, events: IDomainEvent[], version: number) {
+  public async save(
+    id: string,
+    events: IDomainEvent[],
+    version: number,
+    metadata?: object
+  ) {
     const aggregateId = this._getAggregateId(id);
-    return this._store.save(aggregateId, events, version);
+    return this._store.save(aggregateId, events, version, metadata);
   }
 
   public async getById(id: string): Promise<IAggregateState<T>> {

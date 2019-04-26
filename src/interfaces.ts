@@ -264,10 +264,16 @@ export interface IRepository<T> {
    * Save a list of events to the stream for a given aggregate
    * @param id Identifier of the aggregate that events should be saved to
    * @param events List of events to save to this aggregate's stream
-   * @param [version] Optimistic currency lock - will reject if event stream modified in parallel
+   * @param version Optimistic currency lock - will reject if event stream modified in parallel
+   * @param metadata Metadata to be associated with this array of events
    * @returns When events successfully saved
    */
-  save(id: string, events: IDomainEvent[], version?: number): Promise<void>;
+  save(
+    id: string,
+    events: IDomainEvent[],
+    version: number,
+    metadata?: object
+  ): Promise<void>;
 }
 
 /**
