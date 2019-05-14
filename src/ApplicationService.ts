@@ -76,8 +76,10 @@ abstract class ApplicationService implements IApplicationService {
       this.serviceRegistry
     );
 
+    const metadata = this._generateMetadata(aggregateCommand);
+
     // Save the events emitted from the aggregate instance to the repository
-    await repository.save(id, events, version);
+    await repository.save(id, events, version, metadata);
 
     // Return the aggregate id (since it may have been newly generated)
     return { id };
@@ -92,6 +94,10 @@ abstract class ApplicationService implements IApplicationService {
       name,
       id: id || uuid.v4()
     }
+  });
+
+  protected _generateMetadata = (command: IAggregateCommand) => ({
+    userId: command.userId
   });
 
   /**
