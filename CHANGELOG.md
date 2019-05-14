@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="3.0.0"></a>
+# [3.0.0](https://github.com/authentik8/event-sourcing-kit/compare/v2.1.1...v3.0.0) (2019-05-14)
+
+
+### Bug Fixes
+
+* Use single version ([e3f1052](https://github.com/authentik8/event-sourcing-kit/commit/e3f1052))
+
+
+### Code Refactoring
+
+* Convert to multi-package lerna repo ([3e3401f](https://github.com/authentik8/event-sourcing-kit/commit/3e3401f))
+
+
+### Features
+
+* Convert to multiple npm packages ([183e1df](https://github.com/authentik8/event-sourcing-kit/commit/183e1df))
+
+
+### BREAKING CHANGES
+
+* Package eskit is now deprecated, users should instead
+use @eskit/<package>
+* eskit is now exposed as multiple npm packages
+
+
+
 <a name="2.1.1"></a>
 
 ## [2.1.1](https://github.com/authentik8/event-sourcing-kit/compare/v2.1.0...v2.1.1) (2019-04-26)
