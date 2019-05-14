@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+<a name="2.2.0"></a>
+# [2.2.0](https://github.com/authentik8/event-sourcing-kit/compare/v2.1.1...v2.2.0) (2019-05-14)
+
+
+### Features
+
+* Convert to multiple npm packages ([9b9585a](https://github.com/authentik8/event-sourcing-kit/commit/9b9585a))
+
+
+
 <a name="2.1.1"></a>
 ## [2.1.1](https://github.com/authentik8/event-sourcing-kit/compare/v2.1.0...v2.1.1) (2019-04-26)
 
