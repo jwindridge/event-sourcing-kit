@@ -1,0 +1,39 @@
+{
+  "name": "@eskit/core",
+  "version": "1.0.0",
+  "description": "Core portion of the eskit library",
+  "author": "Jonathan Windridge <jonathan.windridge@trium-capital.com>",
+  "homepage": "https://github.com/authentik8/eskit",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "dependencies": {
+    "debug": "^4.1.1",
+    "joi": "^14.3.1"
+  },
+  "devDependencies": {
+    "@types/debug": "^4.1.4",
+    "@types/joi": "14.3.2",
+    "ava": "^1.4.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/authentik8/event-sourcing-kit.git"
+  },
+  "scripts": {
+    "clean": "trash lib",
+    "build": "run-s clean && run-s build:*",
+    "build:tsc": "tsc",
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/authentik8/event-sourcing-kit/issues"
+  }
+}

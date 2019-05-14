@@ -1,0 +1,45 @@
+{
+  "name": "@eskit/repository",
+  "version": "1.0.0",
+  "description": "Aggregate repository implementations for the eskit ecosystem",
+  "author": "Jonathan Windridge <jonathan.windridge@trium-capital.com>",
+  "homepage": "https://github.com/authentik8/event-sourcing-kit#readme",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@eskit/core": "^1.0.0",
+    "@eskit/eventstore": "^1.0.0",
+    "debug": "^4.1.1",
+    "inversify": "^5.0.1",
+    "uuid": "^3.3.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/authentik8/event-sourcing-kit.git"
+  },
+  "scripts": {
+    "clean": "trash lib",
+    "build": "run-s clean && run-s build:*",
+    "build:tsc": "tsc",
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/authentik8/event-sourcing-kit/issues"
+  },
+  "devDependencies": {
+    "@types/debug": "^4.1.4",
+    "@types/inversify": "^2.0.33",
+    "@types/uuid": "^3.4.4"
+  }
+}
