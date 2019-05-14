@@ -8,9 +8,7 @@ import {
   IAggregateState,
   IDomainEvent
 } from '@eskit/core';
-import { IEventStore } from '@eskit/eventstore';
-
-import { TYPES } from './constants';
+import { IEventStore, TYPES } from '@eskit/eventstore';
 import { IRepository } from './interfaces';
 
 @injectable()

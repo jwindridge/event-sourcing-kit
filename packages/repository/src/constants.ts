@@ -1,3 +1,4 @@
 export const TYPES = {
-  EventStore: Symbol('EventStore')
+  Repository: Symbol('Repository'),
+  RepositoryFactory: Symbol('RepositoryFactory')
 };

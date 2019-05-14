@@ -1,3 +1,4 @@
 export const TYPES = {
-  AppendOnlyStore: Symbol('AppendOnlyStore')
+  AppendOnlyStore: Symbol('AppendOnlyStore'),
+  EventStore: Symbol('EventStore')
 };
