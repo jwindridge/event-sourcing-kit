@@ -1,6 +1,6 @@
 {
   "name": "@eskit/application",
-  "version": "3.1.1",
+  "version": "3.1.2",
   "description": "Application-level helpers for the eskit ecosystem",
   "author": "Jonathan Windridge <jonathan.windridge@trium-capital.com>",
   "homepage": "https://github.com/authentik8/eskit",
