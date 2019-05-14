@@ -87,9 +87,6 @@ export interface IAggregateEvent extends IDomainEvent {
 
   // Timestamp (ms) of when this event was captured by the system
   timestamp: number;
-
-  // Any additional metadata that should be saved to this event
-  metadata?: any;
 }
 
 export interface IMessageMetadata {
@@ -126,7 +123,6 @@ export interface IServiceRegistry {
  */
 export interface IAggregateState<T> {
   exists: boolean;
-  id: string;
   state: T;
   version: number;
 }
@@ -199,9 +195,9 @@ export interface IAggregateRoot<T> {
   commands: string[];
 
   /**
-   * Initial aggregate state factory
+   * Initial aggregate state
    */
-  getInitialState: (id: string) => IAggregateState<T>;
+  initialState: IAggregateState<T>;
 
   /**
    * Apply a domain event to an aggregate
@@ -230,13 +226,11 @@ export interface IAggregateRoot<T> {
   /**
    * Rehydrate an aggregate state from an events stream (onto a snapshot if provided)
    *
-   * @param id Aggregate identifier
    * @param events List of events to apply to this aggregate instance
    * @param [snapshot] Optional snapshotted aggregate state (to speed up instantiation)
    * @returns Current aggregate
    */
   rehydrate(
-    id: string,
     events: IDomainEvent[],
     snapshot?: IAggregateState<T>
   ): IAggregateState<T>;
@@ -264,16 +258,10 @@ export interface IRepository<T> {
    * Save a list of events to the stream for a given aggregate
    * @param id Identifier of the aggregate that events should be saved to
    * @param events List of events to save to this aggregate's stream
-   * @param version Optimistic currency lock - will reject if event stream modified in parallel
-   * @param metadata Metadata to be associated with this array of events
+   * @param [version] Optimistic currency lock - will reject if event stream modified in parallel
    * @returns When events successfully saved
    */
-  save(
-    id: string,
-    events: IDomainEvent[],
-    version: number,
-    metadata?: object
-  ): Promise<void>;
+  save(id: string, events: IDomainEvent[], version?: number): Promise<void>;
 }
 
 /**

@@ -12,19 +12,13 @@ import {
 export function createAggregateRoot<T>(
   definition: IAggregateDefinition<T>
 ): IAggregateRoot<T> {
-  const {
-    commands,
-    initialState,
-    name: aggregateName,
-    reducer: eventHandlers
-  } = definition;
+  const { name: aggregateName, reducer: eventHandlers, commands } = definition;
 
-  const getInitialState: (id: string) => IAggregateState<T> = id => ({
-    id,
+  const initialState: IAggregateState<T> = {
     exists: false,
-    state: initialState,
+    state: definition.initialState,
     version: 0
-  });
+  };
 
   const applyEvent = (
     aggregate: IAggregateState<T>,
@@ -36,7 +30,6 @@ export function createAggregateRoot<T>(
     return {
       state,
       exists: aggregate.version !== 0,
-      id: aggregate.id,
       version: aggregate.version + 1
     };
   };
@@ -91,20 +84,16 @@ export function createAggregateRoot<T>(
     return events;
   };
 
-  function rehydrate(
-    id: string,
-    events: IDomainEvent[],
-    snapshot?: IAggregateState<T>
-  ) {
-    return events.reduce(applyEvent, snapshot || getInitialState(id));
+  function rehydrate(events: IDomainEvent[], snapshot?: IAggregateState<T>) {
+    return events.reduce(applyEvent, snapshot || initialState);
   }
 
   return {
     applyCommand,
     applyEvent,
-    getInitialState,
+    initialState,
     rehydrate,
-    commands: Object.keys(commands),
-    name: aggregateName
+    commands: Object.keys(commands).map(cmd => cmd.toLowerCase()),
+    name: aggregateName.toLowerCase()
   };
 }

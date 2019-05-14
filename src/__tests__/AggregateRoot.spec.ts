@@ -83,7 +83,7 @@ test('simple command handler', async t => {
   const incrementedByOne = createCommand('increment', 0);
 
   const events = await counterAggregate.applyCommand(
-    counterAggregate.getInitialState('test'),
+    counterAggregate.initialState,
     incrementedByOne
   );
 
@@ -93,10 +93,7 @@ test('simple command handler', async t => {
 test('handle domain error', async t => {
   const command = createCommand('incrementByPositive', 0, { step: -2 });
   const shouldThrow = () =>
-    counterAggregate.applyCommand(
-      counterAggregate.getInitialState('test'),
-      command
-    );
+    counterAggregate.applyCommand(counterAggregate.initialState, command);
 
   await t.throwsAsync(shouldThrow, { name: 'DomainError' });
 });
@@ -107,7 +104,7 @@ test('multiple yielding command handler', async t => {
   });
 
   const events = await counterAggregate.applyCommand(
-    counterAggregate.getInitialState('test'),
+    counterAggregate.initialState,
     incrementedByDynamic
   );
 
@@ -123,10 +120,7 @@ test('multiple yielding command handler', async t => {
 test('command validation', async t => {
   const badCommand = createCommand('incrementByDynamic', 0, { steps: 'foo' });
   const shouldThrow = () =>
-    counterAggregate.applyCommand(
-      counterAggregate.getInitialState('test'),
-      badCommand
-    );
+    counterAggregate.applyCommand(counterAggregate.initialState, badCommand);
 
   await t.throwsAsync(shouldThrow, {
     instanceOf: CommandValidationError
@@ -136,7 +130,6 @@ test('command validation', async t => {
 test('stateful multiple yielding', async t => {
   const initial = {
     exists: true,
-    id: 'test',
     state: { value: 5 },
     version: 1
   };
@@ -155,7 +148,7 @@ test('stateful multiple yielding', async t => {
 });
 
 test('asynchronous commands', async t => {
-  const initial = counterAggregate.getInitialState('test');
+  const initial = counterAggregate.initialState;
   const delayedIncrement = createCommand('delayedIncrement', 0);
   const events = await counterAggregate.applyCommand(initial, delayedIncrement);
 
@@ -164,7 +157,7 @@ test('asynchronous commands', async t => {
 });
 
 test('asynchronous error handling', async t => {
-  const initial = counterAggregate.getInitialState('test');
+  const initial = counterAggregate.initialState;
   const delayedIncrement = createCommand('delayedIncrement', 0, { step: -1 });
 
   const shouldThrow = counterAggregate.applyCommand(initial, delayedIncrement);
@@ -173,7 +166,7 @@ test('asynchronous error handling', async t => {
 });
 
 test('asynchronous yielding command handler', async t => {
-  const initial = counterAggregate.getInitialState('test');
+  const initial = counterAggregate.initialState;
   const delayedIncrement = createCommand('delayedYieldingIncrement', 0);
   const events = await counterAggregate.applyCommand(initial, delayedIncrement);
 
@@ -182,7 +175,7 @@ test('asynchronous yielding command handler', async t => {
 });
 
 test('multiple command handlers', async t => {
-  const initial = counterAggregate.getInitialState('test');
+  const initial = counterAggregate.initialState;
   const arrayIncrement = createCommand('arrayIncrements', 0);
   const events = await counterAggregate.applyCommand(initial, arrayIncrement);
   t.is(events.length, 3);

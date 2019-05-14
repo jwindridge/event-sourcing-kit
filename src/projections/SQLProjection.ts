@@ -118,7 +118,7 @@ abstract class SQLProjection implements IProjection {
    * @returns Promise that resolves once projection has been updated
    */
   public async apply(event: IAggregateEvent): Promise<void> {
-    const eventType = `${event.aggregate.name}.${event.name}`;
+    const eventType = `${event.aggregate.name}.${event.name}`.toLowerCase();
 
     const handler = this.eventHandlers[eventType];
 

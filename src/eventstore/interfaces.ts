@@ -19,8 +19,7 @@ export interface IEventStore extends EventEmitter {
   save(
     aggregate: IAggregateIdentifier,
     events: IDomainEvent[],
-    version: number,
-    metadata?: { [s: string]: any }
+    version: number
   ): Promise<void>;
 
   /**
