@@ -1,0 +1,49 @@
+{
+  "name": "@eskit/projections",
+  "version": "1.0.0",
+  "description": "Library for constructing event-sourced projections for the eskit ecosystem",
+  "author": "Jonathan Windridge <jonathan.windridge@trium-capital.com>",
+  "homepage": "https://github.com/authentik8/event-sourcing-kit#readme",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@eskit/core": "^1.0.0",
+    "@eskit/eventstore": "^1.0.0",
+    "@types/debug": "^4.1.4",
+    "debug": "4.1.1",
+    "inversify": "^5.0.1",
+    "knex": "^0.16.5"
+  },
+  "optionalDependencies": {
+    "pg": "^7.9.0",
+    "pg-native": "^3.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/authentik8/event-sourcing-kit.git"
+  },
+  "scripts": {
+    "clean": "trash lib",
+    "build": "run-s clean && run-s build:*",
+    "build:tsc": "tsc",
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/authentik8/event-sourcing-kit/issues"
+  },
+  "devDependencies": {
+    "@types/debug": "^4.1.4",
+    "@types/inversify": "^2.0.33"
+  }
+}
