@@ -19,17 +19,8 @@ export interface IFileStoreConfig {
 }
 
 @injectable()
-export class FileStoreConfig implements IFileStoreConfig {
-  public readonly filepath: string;
-
-  constructor(opts: IFileStoreConfig) {
-    this.filepath = opts.filepath;
-  }
-}
-
-@injectable()
 export class FileStore implements IAppendOnlyStore {
-  private readonly _config: FileStoreConfig;
+  private readonly _config: IFileStoreConfig;
   private _nextId?: number;
 
   constructor(config: IFileStoreConfig) {

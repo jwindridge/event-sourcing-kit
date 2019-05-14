@@ -1,8 +1,9 @@
 export * from './interfaces';
 export * from './constants';
 
-import * as storage from './storage';
-
 import EventStore from './EventStore';
 
-export { EventStore, storage };
+import FileEventStore from './FileEventStore';
+import InMemoryStore from './InMemoryEventStore';
+
+export { EventStore, InMemoryStore, FileEventStore };
