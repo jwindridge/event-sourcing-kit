@@ -12,10 +12,14 @@ export const createAggregateEvent = (
   aggregate: IAggregateIdentifier,
   domainEvent: IDomainEvent,
   eventId: number,
-  version: number
+  version: number,
+  timestamp?: number,
+  metadata?: object
 ): IAggregateEvent => ({
   ...domainEvent,
   aggregate,
+  metadata,
   version,
-  id: eventId
+  id: eventId,
+  timestamp: timestamp || new Date().getTime()
 });

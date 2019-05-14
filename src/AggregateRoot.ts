@@ -12,13 +12,19 @@ import {
 export function createAggregateRoot<T>(
   definition: IAggregateDefinition<T>
 ): IAggregateRoot<T> {
-  const { name: aggregateName, reducer: eventHandlers, commands } = definition;
+  const {
+    commands,
+    initialState,
+    name: aggregateName,
+    reducer: eventHandlers
+  } = definition;
 
-  const initialState: IAggregateState<T> = {
+  const getInitialState: (id: string) => IAggregateState<T> = id => ({
+    id,
     exists: false,
-    state: definition.initialState,
+    state: initialState,
     version: 0
-  };
+  });
 
   const applyEvent = (
     aggregate: IAggregateState<T>,
@@ -30,16 +36,17 @@ export function createAggregateRoot<T>(
     return {
       state,
       exists: aggregate.version !== 0,
+      id: aggregate.id,
       version: aggregate.version + 1
     };
   };
 
-  const handle = async (
+  const applyCommand = async (
     entity: IAggregateState<T>,
     command: IDomainCommand,
-    services?: IServiceRegistry
+    services: IServiceRegistry
   ): Promise<IDomainEvent[]> => {
-    const handler = commands[command.name];
+    const commandHandlerMapEntry = commands[command.name];
 
     const events: IDomainEvent[] = [];
     let instance: IPublishableAggregateState<T>;
@@ -56,31 +63,48 @@ export function createAggregateRoot<T>(
 
     instance = { ...entity, publish };
 
-    const generator = handler({ ...entity, publish }, command, services);
+    const handlerList = Array.isArray(commandHandlerMapEntry)
+      ? commandHandlerMapEntry
+      : [commandHandlerMapEntry];
 
-    // Handler method can either call `entity.publish` directly & return void,
-    // or it can be a generator, in which case we need to iterate through all
-    // the published events
-    if (generator !== undefined) {
-      let event = await Promise.resolve(generator.next(instance));
+    const _apply = async (fn: any) => {
+      const generator = await Promise.resolve(fn(instance, command, services));
 
-      while (!event.done) {
-        event = await Promise.resolve(generator.next(instance));
+      // Handler method can either call `entity.publish` directly & return void,
+      // or it can be a generator, in which case we need to iterate through all
+      // the published events
+      if (generator !== undefined) {
+        let event = await Promise.resolve(generator.next(instance));
+
+        while (!event.done) {
+          event = await Promise.resolve(generator.next(instance));
+        }
       }
+
+      return Promise.resolve(events);
+    };
+
+    for (const handler of handlerList) {
+      await _apply(handler);
     }
 
-    return Promise.resolve(events);
+    return events;
   };
 
-  function rehydrate(events: IDomainEvent[], snapshot?: IAggregateState<T>) {
-    return events.reduce(applyEvent, snapshot || initialState);
+  function rehydrate(
+    id: string,
+    events: IDomainEvent[],
+    snapshot?: IAggregateState<T>
+  ) {
+    return events.reduce(applyEvent, snapshot || getInitialState(id));
   }
 
   return {
+    applyCommand,
     applyEvent,
-    initialState,
+    getInitialState,
     rehydrate,
-    applyCommand: handle,
-    name: aggregateName.toLowerCase()
+    commands: Object.keys(commands),
+    name: aggregateName
   };
 }

@@ -14,7 +14,7 @@ import {
 } from './interfaces';
 import { buildTable } from './util';
 
-const debug = debugModule('eskit:SQLProjection');
+const debug = debugModule('eskit:projections:SQLProjection');
 const BEGINNING = 0;
 
 /**
@@ -22,7 +22,6 @@ const BEGINNING = 0;
  */
 @injectable()
 abstract class SQLProjection implements IProjection {
-
   // Definition of the table schema associated with this projection
   protected abstract schema: ITableDefinition;
 
@@ -49,6 +48,9 @@ abstract class SQLProjection implements IProjection {
   // Storage for current position
   private _positionStore: IProjectionPositionStore;
 
+  // Boolean flag indicating whether this projection has been started
+  private _started: boolean = false;
+
   constructor(
     @inject(FRAMEWORK_TYPES.projections.KnexClient) knex: Knex,
     @inject(FRAMEWORK_TYPES.eventstore.EventStore) store: IEventStore,
@@ -72,6 +74,8 @@ abstract class SQLProjection implements IProjection {
    * Start the projection:
    */
   public async start(): Promise<void> {
+    this._started = true;
+
     // Connect event handler
     // For as long as we don't call "next", this will buffer events while reconstituting projection state
     const eventStream = eventEmitterAsyncIterator<IAggregateEvent>(
@@ -100,19 +104,31 @@ abstract class SQLProjection implements IProjection {
     this._bindEventStream(eventStream);
   }
 
+  // Promise that will resolve once the projection is up to date
+  public async ready(): Promise<void> {
+    if (!this._started) {
+      return this.start();
+    }
+    return Promise.resolve();
+  }
+
   /**
    * Applies an event to the projection
    * @param event New event to process
    * @returns Promise that resolves once projection has been updated
    */
   public async apply(event: IAggregateEvent): Promise<void> {
-    const eventType = `${event.aggregate.name}.${event.name}`.toLowerCase();
-
-    debug(`Apply event ${eventType}: ${JSON.stringify(event)}`);
+    const eventType = `${event.aggregate.name}.${event.name}`;
 
     const handler = this.eventHandlers[eventType];
 
     if (handler !== undefined) {
+      debug(
+        `${this.constructor.name}: Apply event ${eventType}: ${JSON.stringify(
+          event
+        )}`
+      );
+
       // If this projection cares about the event, apply the handler
       try {
         await handler(this.collection!, event);
@@ -124,7 +140,9 @@ abstract class SQLProjection implements IProjection {
         throw reason;
       }
     } else {
-      debug(`Unable to find handler for ${eventType}`);
+      debug(
+        `${this.constructor.name}: No event handler for ${eventType}, ignoring`
+      );
     }
 
     // Update the last known position of this projection
@@ -138,15 +156,17 @@ abstract class SQLProjection implements IProjection {
   public async rebuild(): Promise<void> {
     // Drop the projection table if it exists
     await this._knex.schema.dropTableIfExists(this.schema.name);
-    debug(`Dropped table "${this.schema.name}"`);
+    debug(`${this.constructor.name}: Dropped table "${this.schema.name}"`);
 
     // Reset our saved position to 0
     await this.updateSavedPosition(BEGINNING);
-    debug(`Reset projection position to ${BEGINNING}`);
+    debug(
+      `${this.constructor.name}: Reset projection position to ${BEGINNING}`
+    );
 
     // Restart the projection
     await this.start();
-    debug('Started projection');
+    debug(`${this.constructor.name}: Started projection`);
   }
 
   /**
@@ -187,7 +207,6 @@ abstract class SQLProjection implements IProjection {
 
     // Set the collection attribute on the projection
     this._collection = db(tableName);
-
   }
 
   /**
@@ -196,9 +215,13 @@ abstract class SQLProjection implements IProjection {
    * @returns Promise that resolves once all events have been applied
    */
   private async _applyEventsSince(position: number): Promise<void> {
-    debug(`Retrieving events since event #${position}`);
+    debug(
+      `${this.constructor.name}: Retrieving events since event #${position}`
+    );
     const unprocessedEvents = await this._store.loadAllEvents(position);
-    debug(`Applying ${unprocessedEvents.length} events`);
+    debug(
+      `${this.constructor.name}: Applying ${unprocessedEvents.length} events`
+    );
     for (const event of unprocessedEvents) {
       try {
         await this.apply(event);
@@ -214,6 +237,7 @@ abstract class SQLProjection implements IProjection {
     eventStream: AsyncIterableIterator<IAggregateEvent>
   ) {
     // Connect the `apply` method to the stream of events produced by the event store
+    debug(`${this.constructor.name}: Binding to event stream`);
     for await (const event of eventStream) {
       await this.apply(event);
     }
