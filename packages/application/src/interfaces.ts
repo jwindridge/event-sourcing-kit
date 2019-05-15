@@ -1,4 +1,4 @@
-import { IApplicationCommand, IAggregateCommand } from '@eskit/core';
+import { IAggregateCommand, IApplicationCommand } from '@eskit/core';
 
 export interface IApplicationService {
   /**

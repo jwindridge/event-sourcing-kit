@@ -8,7 +8,8 @@ tslint.json
 .prettierignore
 .vscode
 build/docs
-**/*.spec.*
+**/*.test.*
+**/__tests__/*
 coverage
 .nyc_output
 *.log

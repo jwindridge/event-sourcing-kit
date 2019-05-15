@@ -35,7 +35,7 @@
     "emitDecoratorMetadata": true /* Enables experimental support for emitting type metadata for decorators. */,
 
     "lib": ["es2017", "esnext.asynciterable"],
-    "types": ["node"]
+    "types": ["node", "jest", "node_modules/@types"]
   },
   "exclude": ["node_modules", "**/*.spec.ts"]
 }
