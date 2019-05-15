@@ -1,3 +1,4 @@
+import { UnknownCommandError, UnknownEventError } from './errors';
 import { createEvent } from './Event';
 import {
   IAggregateDefinition,
@@ -32,12 +33,18 @@ export function createAggregateRoot<T>(
   ): IAggregateState<T> => {
     const { name } = event;
     const update = eventHandlers[name];
+
+    if (update === undefined) {
+      throw new UnknownEventError(definition.name, name);
+    }
+
     const state = update(aggregate.state, event);
+    const version = aggregate.version + 1;
     return {
       state,
-      exists: aggregate.version !== 0,
-      id: aggregate.id,
-      version: aggregate.version + 1
+      version,
+      exists: version !== 0,
+      id: aggregate.id
     };
   };
 
@@ -47,6 +54,10 @@ export function createAggregateRoot<T>(
     services: IServiceRegistry
   ): Promise<IDomainEvent[]> => {
     const commandHandlerMapEntry = commands[command.name];
+
+    if (commandHandlerMapEntry === undefined) {
+      throw new UnknownCommandError(definition.name, command.name);
+    }
 
     const events: IDomainEvent[] = [];
     let instance: IPublishableAggregateState<T>;
