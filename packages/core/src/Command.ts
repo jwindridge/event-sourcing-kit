@@ -1,4 +1,4 @@
-import Joi, { SchemaLike, ValidationOptions } from 'joi';
+import Joi, { SchemaLike, ValidationOptions } from '@hapi/joi';
 
 import { CommandValidationError } from './errors';
 import { CommandHandler, IDomainCommand } from './interfaces';

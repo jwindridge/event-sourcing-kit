@@ -1,4 +1,4 @@
-import { ValidationError } from 'joi';
+import { ValidationError } from '@hapi/joi';
 import DomainError from './DomainError';
 
 export default class CommandValidationError extends DomainError {

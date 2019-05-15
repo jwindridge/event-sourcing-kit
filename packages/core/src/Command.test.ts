@@ -1,5 +1,5 @@
 import 'jest';
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 
 import { createCommand, createCommandValidator } from './Command';
 import { CommandValidationError } from './errors';
