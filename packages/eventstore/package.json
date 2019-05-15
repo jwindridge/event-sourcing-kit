@@ -1,6 +1,6 @@
 {
   "name": "@eskit/eventstore",
-  "version": "3.2.1",
+  "version": "3.2.2",
   "description": "Event store for the eskit ecosystem",
   "author": "Jonathan Windridge <jonathan.windridge@trium-capital.com>",
   "homepage": "https://github.com/authentik8/eskit",
@@ -15,7 +15,7 @@
     "lib"
   ],
   "dependencies": {
-    "@eskit/core": "^3.2.1",
+    "@eskit/core": "^3.2.2",
     "async-file": "^2.0.2",
     "debug": "^4.1.1",
     "inversify": "5.0.1",
