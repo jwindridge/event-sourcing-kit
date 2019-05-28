@@ -25,18 +25,20 @@
     "node": ">=8.9"
   },
   "dependencies": {
-    "debug": "^4.1.1"
+    "debug": "^4.1.1",
+    "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {
-    "@babel/core": "^7.4.4",
+    "@babel/core": "^7.4.5",
     "@babel/plugin-proposal-class-properties": "^7.4.4",
     "@babel/plugin-proposal-decorators": "^7.4.4",
-    "@babel/preset-env": "^7.4.4",
+    "@babel/preset-env": "^7.4.5",
     "@babel/preset-typescript": "^7.3.3",
     "@types/debug": "^4.1.4",
     "@types/jest": "^24.0.13",
     "@types/node": "^11.10.5",
     "babel-jest": "^24.8.0",
+    "babel-plugin-parameter-decorator": "^1.0.7",
     "codecov": "^3.1.0",
     "cz-conventional-changelog": "^2.1.0",
     "gh-pages": "^2.0.1",
@@ -48,7 +50,8 @@
     "prettier": "^1.15.2",
     "standard-version": "^4.4.0",
     "trash-cli": "^1.4.0",
-    "tslint": "^5.14.0",
+    "ts-jest": "^24.0.2",
+    "tslint": "^5.16.0",
     "tslint-config-prettier": "^1.17.0",
     "typedoc": "^0.14.2",
     "typescript": "^3.1.6"
