@@ -20,6 +20,10 @@ const stores = [
   },
   {
     opts: FILE_STORE_OPTS,
+    setup: async () => {
+      const filePath = path.resolve(FILE_STORE_OPTS.filepath);
+      await fs.truncate(filePath);
+    },
     store: FileEventStore,
     type: 'FileEventStore'
   }
@@ -28,7 +32,7 @@ const stores = [
 const event1 = createEvent('somethingHappened', { foo: 'bar' });
 const event2 = createEvent('somethingElseHappened', { foo: 'baz' });
 
-stores.forEach(({ opts, store, type }) => {
+stores.forEach(({ opts, setup, store, type }) => {
   const widget1Id: IAggregateIdentifier = { id: 'abc123', name: 'widget' };
   const widget2Id: IAggregateIdentifier = { id: 'def456', name: 'widget' };
 
@@ -36,8 +40,10 @@ stores.forEach(({ opts, store, type }) => {
 
   describe(type, () => {
     beforeEach(async done => {
-      const filePath = path.resolve(FILE_STORE_OPTS.filepath);
-      await fs.truncate(filePath);
+      if (setup !== undefined) {
+        await setup();
+      }
+
       eventStore = new store(opts as any);
 
       done();
@@ -57,14 +63,38 @@ stores.forEach(({ opts, store, type }) => {
         savedEvents.forEach((e, idx) => {
           // Saved events should be enriched with aggregate information
           expect(e).toMatchObject({
+            ...e,
             aggregate: widget1Id,
-            data: domainEvents[idx].data,
             id: idx + 1,
-            name: domainEvents[idx].name,
             version: idx + 1
           });
 
           // Events should be timestamped between before & after the call to save the events
+          expect(e.timestamp).toBeGreaterThanOrEqual(startTs);
+          expect(e.timestamp).toBeLessThanOrEqual(endTs);
+        });
+      });
+
+      it('should save events with metadata if supplied', async () => {
+        const domainEvents = [event1, event2];
+
+        const metadata = { userId: 'user123' };
+
+        const startTs = Date.now();
+        await eventStore.save(widget1Id, domainEvents, 0, metadata);
+        const endTs = Date.now();
+
+        const savedEvents = await eventStore.loadEvents(widget1Id);
+
+        expect(savedEvents.length).toBe(2);
+        savedEvents.forEach((e, idx) => {
+          expect(e).toMatchObject({
+            ...e,
+            metadata,
+            aggregate: widget1Id,
+            id: idx + 1,
+            version: idx + 1
+          });
           expect(e.timestamp).toBeGreaterThanOrEqual(startTs);
           expect(e.timestamp).toBeLessThanOrEqual(endTs);
         });
