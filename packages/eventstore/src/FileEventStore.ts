@@ -1,13 +1,14 @@
 import { injectable } from 'inversify';
 
 import EventStore from './EventStore';
-import { FileStore, IFileStoreConfig } from './storage';
+import { IFileEventStoreOptions } from './interfaces';
+import { FileStore } from './storage';
 
 @injectable()
 class FileEventStore extends EventStore {
-  constructor(config: IFileStoreConfig) {
-    const storage = new FileStore(config);
-    super(storage);
+  constructor(options: IFileEventStoreOptions) {
+    const storage = new FileStore(options);
+    super(storage, options);
   }
 }
 

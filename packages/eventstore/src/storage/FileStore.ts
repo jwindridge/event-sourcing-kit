@@ -5,7 +5,7 @@ import { injectable } from 'inversify';
 import { dirname } from 'path';
 
 import { AppendOnlyStoreConcurrencyError } from './errors';
-import { IAppendOnlyStore, IStreamData } from './interfaces';
+import { IAppendOnlyStore, IFileStoreConfig, IStreamData } from './interfaces';
 
 const debug = debugModule('eskit:eventstore:FileStorage');
 
@@ -13,10 +13,6 @@ const matchesStream = (streamId: string) => (record: IStreamData) =>
   record.streamId === streamId;
 const afterVersion = (after: number) => (record: IStreamData) =>
   record.version > after;
-
-export interface IFileStoreConfig {
-  filepath: string;
-}
 
 @injectable()
 export class FileStore implements IAppendOnlyStore {
