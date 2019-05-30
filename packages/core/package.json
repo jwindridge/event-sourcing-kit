@@ -1,6 +1,6 @@
 {
   "name": "@eskit/core",
-  "version": "3.2.3",
+  "version": "3.3.0",
   "description": "Core portion of the eskit library",
   "author": "Jonathan Windridge <jonathan.windridge@trium-capital.com>",
   "homepage": "https://github.com/authentik8/eskit",
