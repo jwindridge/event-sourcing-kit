@@ -6,8 +6,12 @@ import path from 'path';
 import FileEventStore from './FileEventStore';
 import InMemoryEventStore from './InMemoryEventStore';
 
-import { IEventStore } from './interfaces';
-import { AppendOnlyStoreConcurrencyError } from './storage';
+import {
+  IEventStore,
+  IEventStoreOptions,
+  IInMemoryEventStoreOptions
+} from './interfaces';
+import { AppendOnlyStoreConcurrencyError, InMemoryStore } from './storage';
 
 const IN_MEMORY_STORE_OPTS = {};
 const FILE_STORE_OPTS = { filepath: 'test/events.log' };
@@ -37,6 +41,7 @@ stores.forEach(({ opts, setup, store, type }) => {
   const widget2Id: IAggregateIdentifier = { id: 'def456', name: 'widget' };
 
   let eventStore: IEventStore;
+  let createStore: (additionalOpts?: IEventStoreOptions) => IEventStore;
 
   describe(type, () => {
     beforeEach(async done => {
@@ -45,6 +50,8 @@ stores.forEach(({ opts, setup, store, type }) => {
       }
 
       eventStore = new store(opts as any);
+      createStore = additionalOpts =>
+        new store({ ...opts, ...additionalOpts } as any);
 
       done();
     });
@@ -222,6 +229,69 @@ stores.forEach(({ opts, setup, store, type }) => {
 
           expect(subsetEvents[4].id).toBe(34);
           expect(subsetEvents[4].aggregate.name).toBe('widget');
+        });
+      });
+
+      describe('multiple contexts', () => {
+        // Create event stores for two different contexts
+        let fooEventStore: IEventStore;
+        let barEventStore: IEventStore;
+
+        let appendOnlyStore: InMemoryStore;
+
+        const fooStoreOpts: IEventStoreOptions = { context: 'foo' };
+        const barStoreOpts: IEventStoreOptions = { context: 'bar' };
+
+        // If we're testing the in-memory implementation, ensure that we're using the same in memory store instance
+        if (type === 'InMemoryEventStore') {
+          appendOnlyStore = new InMemoryStore();
+          (fooStoreOpts as IInMemoryEventStoreOptions).store = appendOnlyStore;
+          (barStoreOpts as IInMemoryEventStoreOptions).store = appendOnlyStore;
+        }
+
+        beforeEach(() => {
+          fooEventStore = createStore(fooStoreOpts);
+          barEventStore = createStore(barStoreOpts);
+        });
+
+        const aggregateId: IAggregateIdentifier = {
+          id: 'abc',
+          name: 'book'
+        };
+
+        /* Perhaps a slightly contrived example, but we create a stream of events in two contexts
+         * that are both appropriate for a "book" aggregate within their respective domains
+         */
+        const fooDomainEvents = [
+          createEvent('created', { name: 'trading' }),
+          createEvent('archived', { reason: 'inactivity' })
+        ];
+
+        const barDomainEvents = [
+          createEvent('draftCompleted'),
+          createEvent('reviewed', { comments: 'Needs more info' }),
+          createEvent('published', { publisher: 'ACME Books' })
+        ];
+
+        it('should partition events by context information if provided', async () => {
+          await fooEventStore.save(aggregateId, fooDomainEvents, 0);
+          await barEventStore.save(aggregateId, barDomainEvents, 0);
+
+          const savedFooEvents = await fooEventStore.loadEvents(aggregateId);
+          const savedBarEvents = await barEventStore.loadEvents(aggregateId);
+
+          expect(savedFooEvents.length).toBe(2);
+          expect(savedFooEvents.map(({ name }) => name)).toStrictEqual([
+            'created',
+            'archived'
+          ]);
+
+          expect(savedBarEvents.length).toBe(3);
+          expect(savedBarEvents.map(({ name }) => name)).toStrictEqual([
+            'draftCompleted',
+            'reviewed',
+            'published'
+          ]);
         });
       });
     });

@@ -11,7 +11,7 @@ import {
 } from '@eskit/core';
 
 import { TYPES } from './constants';
-import { IEventStore } from './interfaces';
+import { IEventStore, IEventStoreOptions } from './interfaces';
 import { IAppendOnlyStore, IStreamData } from './storage';
 
 const debug = debugModule('eskit:eventstore:EventStore');
@@ -27,11 +27,18 @@ interface IStoredEvent extends IStreamData {
 
 @injectable()
 class EventStore extends EventEmitter implements IEventStore {
+  // The bounded context for which events saved by this event store instance relate to
+  public readonly context?: string;
+
   private readonly _storage: IAppendOnlyStore;
 
-  constructor(@inject(TYPES.AppendOnlyStore) store: IAppendOnlyStore) {
+  constructor(
+    @inject(TYPES.AppendOnlyStore) store: IAppendOnlyStore,
+    options?: IEventStoreOptions
+  ) {
     super();
     this._storage = store;
+    this.context = options && options.context;
   }
 
   public async save(
@@ -94,8 +101,12 @@ class EventStore extends EventEmitter implements IEventStore {
    * @param agggregateId - Aggregate identifier
    * @returns JSON-encoded aggregate id
    */
-  private getStreamId = (aggregateId: IAggregateIdentifier) =>
-    stringify(aggregateId);
+  private getStreamId: (aggregateId: IAggregateIdentifier) => string = (
+    aggregateId: IAggregateIdentifier
+  ) => {
+    const context = this.context || null;
+    return stringify({ ...aggregateId, context });
+  };
 
   /**
    * Convert a stream identifier back to an aggregate id

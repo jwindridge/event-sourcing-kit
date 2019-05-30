@@ -19,3 +19,7 @@ export interface IStreamData {
   data: any;
   timestamp: number;
 }
+
+export interface IFileStoreConfig {
+  filepath: string;
+}

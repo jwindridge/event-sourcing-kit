@@ -1,5 +1,5 @@
 export * from './errors';
 export * from './interfaces';
 
-export { FileStore, IFileStoreConfig } from './FileStore';
+export { FileStore } from './FileStore';
 export { InMemoryStore } from './InMemory';

@@ -6,6 +6,24 @@ import {
   IDomainEvent
 } from '@eskit/core';
 
+import { IFileStoreConfig, InMemoryStore } from './storage';
+
+/**
+ * Configuration options for an event store
+ */
+export interface IEventStoreOptions {
+  // The bounded context for which events saved to this store instance relate to
+  context?: string;
+}
+
+export interface IFileEventStoreOptions
+  extends IEventStoreOptions,
+    IFileStoreConfig {}
+
+export interface IInMemoryEventStoreOptions extends IEventStoreOptions {
+  store?: InMemoryStore;
+}
+
 /**
  * Storage mechanism for saving & retrieving aggregate events
  */
