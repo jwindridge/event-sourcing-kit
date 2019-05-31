@@ -123,6 +123,17 @@ export interface IEventReducer<T> {
 }
 
 /**
+ * Function that determines whether a conflict between saved & expected
+ *  versions can be resolved
+ */
+export type ConcurrencyErrorResolver<T> = (params: {
+  actualState: IAggregateState<T>;
+  expectedState: IAggregateState<T>;
+  newEvents: IDomainEvent[];
+  savedEvents: IAggregateEvent[];
+}) => IDomainEvent[] | false;
+
+/**
  * Definition of an aggregate root for an entity of type `T`
  */
 export interface IAggregateDefinition<T> {
@@ -137,6 +148,8 @@ export interface IAggregateDefinition<T> {
 
   /* Command handlers */
   commands: ICommandHandlerMap<T>;
+
+  concurrencyErrorResolver?: ConcurrencyErrorResolver<T>;
 }
 
 /**
@@ -196,4 +209,22 @@ export interface IAggregateRoot<T> {
     events: IDomainEvent[],
     snapshot?: IAggregateState<T>
   ): IAggregateState<T>;
+
+  /**
+   *
+   * @param args Parameter object
+   * @param args.actualState Current state of the aggregate based on saved events from store
+   * @param args.expectedState State of the aggregate at the version expected by the issuing command
+   * @param args.newEvents Array of new events that caused the AppendOnlyStoreConcurrencyError
+   * @param args.savedEvents Array of events that have been saved to the event stream after the expected version
+   *
+   * @returns List of (potentially modified) events that should be saved to the stream if the
+   *          mismatch is tolerable, or false if an error should be thrown
+   */
+  resolveConcurrencyError(args: {
+    actualState: IAggregateState<T>;
+    expectedState: IAggregateState<T>;
+    newEvents: IDomainEvent[];
+    savedEvents: IAggregateEvent[];
+  }): IDomainEvent[] | false;
 }
