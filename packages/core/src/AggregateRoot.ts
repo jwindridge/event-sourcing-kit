@@ -2,12 +2,14 @@ import { UnknownCommandError, UnknownEventError } from './errors';
 import { createEvent } from './Event';
 import {
   IAggregateDefinition,
+  IAggregateEvent,
   IAggregateRoot,
   IAggregateState,
   IDomainCommand,
   IDomainEvent,
   IPublishableAggregateState,
-  IServiceRegistry
+  IServiceRegistry,
+  ConcurrencyErrorResolver
 } from './interfaces';
 
 export function createAggregateRoot<T>(
@@ -110,11 +112,23 @@ export function createAggregateRoot<T>(
     return events.reduce(applyEvent, snapshot || getInitialState(id));
   }
 
+  function resolveConcurrencyError(args: {
+    actualState: IAggregateState<T>;
+    expectedState: IAggregateState<T>;
+    newEvents: IDomainEvent[];
+    savedEvents: IAggregateEvent[];
+  }) {
+    const resolver: ConcurrencyErrorResolver<T> =
+      definition.concurrencyErrorResolver || (_ => false);
+    return resolver(args);
+  }
+
   return {
     applyCommand,
     applyEvent,
     getInitialState,
     rehydrate,
+    resolveConcurrencyError,
     commands: Object.keys(commands),
     name: aggregateName
   };
