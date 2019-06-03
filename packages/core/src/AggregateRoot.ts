@@ -1,6 +1,7 @@
 import { UnknownCommandError, UnknownEventError } from './errors';
 import { createEvent } from './Event';
 import {
+  ConcurrencyErrorResolver,
   IAggregateDefinition,
   IAggregateEvent,
   IAggregateRoot,
@@ -8,8 +9,7 @@ import {
   IDomainCommand,
   IDomainEvent,
   IPublishableAggregateState,
-  IServiceRegistry,
-  ConcurrencyErrorResolver
+  IServiceRegistry
 } from './interfaces';
 
 export function createAggregateRoot<T>(
