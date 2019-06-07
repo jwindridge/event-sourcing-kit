@@ -1,4 +1,4 @@
-# `core`
+# `@eskit/core`
 
 Core functionality for definition of aggregate roots & associated functionality
 
