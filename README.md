@@ -1,59 +1,26 @@
 # eskit - A framework for building Event Sourced / CQRS Applications
 
-`eskit` (Pronounced 'ess-kit') is a library for building applications that make use of event
-sourcing.
+`eskit` (Pronounced 'ess-kit') is a collection of components to aid in building applications that 
+make use of event sourcing. This is a multirepo, with individual packages exposed under the `@eskit` npm namespace.
 
-## Installation
+## Installation (Development)
 
 ```bash
-npm install eskit
+git clone git@github.com:authentik8/event-sourcing-kit.git
+cd event-sourcing-kit
+npm install
+npx lerna bootstrap
 ```
 
 The project makes use of [InversifyJS](https://inversify.io) for managing dependency injection.
 This package requires reflection of metadata, and as such a call to `require('reflect-metadata')`
-must be made prior to importing eskit package components.
+must be made prior to importing eskit package components if utilisation of this functionality is
+desired.
 
 ## Running the tests
 
 ```bash
 npm run test
-```
-
-## Building the documentation
-
-```bash
-npm run doc
-```
-
-## Usage
-
-- Defining an aggregate
-
-```typescript
-import { createAggregateRoot, IAggregateRoot } from 'eskit';
-
-interface ICounter {
-  value: number;
-}
-
-const Counter = createAggregateRoot<ICounter>({
-  commands: {
-    incrementBy(entity, command) {
-      const { by } = command.data;
-      entity.publish('incremented', { by });
-    }
-  },
-  initialState: {
-    value: 0
-  },
-  name: 'counter',
-  reducer: {
-    incremented: (state, event) => ({
-      ...state,
-      value: state.value + event.data.by
-    })
-  }
-});
 ```
 
 ## Contributing
