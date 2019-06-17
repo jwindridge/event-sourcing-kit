@@ -3,57 +3,17 @@
 `eskit` (Pronounced 'ess-kit') is a library for building applications that make use of event
 sourcing.
 
-## Installation
-
-```bash
-npm install eskit
-```
+Please note that this is a lerna multirepo - individual `@eskit` npm packages are held in the `/packages` directory.
 
 The project makes use of [InversifyJS](https://inversify.io) for managing dependency injection.
 This package requires reflection of metadata, and as such a call to `require('reflect-metadata')`
 must be made prior to importing eskit package components.
 
-## Running the tests
+## Installation (Development)
 
 ```bash
-npm run test
-```
-
-## Building the documentation
-
-```bash
-npm run doc
-```
-
-## Usage
-
-- Defining an aggregate
-
-```typescript
-import { createAggregateRoot, IAggregateRoot } from 'eskit';
-
-interface ICounter {
-  value: number;
-}
-
-const Counter = createAggregateRoot<ICounter>({
-  commands: {
-    incrementBy(entity, command) {
-      const { by } = command.data;
-      entity.publish('incremented', { by });
-    }
-  },
-  initialState: {
-    value: 0
-  },
-  name: 'counter',
-  reducer: {
-    incremented: (state, event) => ({
-      ...state,
-      value: state.value + event.data.by
-    })
-  }
-});
+npm install
+lerna bootstrap
 ```
 
 ## Contributing
