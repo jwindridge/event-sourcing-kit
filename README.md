@@ -1,19 +1,28 @@
 # eskit - A framework for building Event Sourced / CQRS Applications
 
-`eskit` (Pronounced 'ess-kit') is a library for building applications that make use of event
-sourcing.
+`eskit` (Pronounced 'ess-kit') is a collection of components to aid in building applications that
+make use of event sourcing. This is a multirepo, with individual packages exposed under the `@eskit` npm namespace.
 
 Please note that this is a lerna multirepo - individual `@eskit` npm packages are held in the `/packages` directory.
-
-The project makes use of [InversifyJS](https://inversify.io) for managing dependency injection.
-This package requires reflection of metadata, and as such a call to `require('reflect-metadata')`
-must be made prior to importing eskit package components.
 
 ## Installation (Development)
 
 ```bash
+git clone git@github.com:authentik8/event-sourcing-kit.git
+cd event-sourcing-kit
 npm install
-lerna bootstrap
+npx lerna bootstrap
+```
+
+The project makes use of [InversifyJS](https://inversify.io) for managing dependency injection.
+This package requires reflection of metadata, and as such a call to `require('reflect-metadata')`
+must be made prior to importing eskit package components if utilisation of this functionality is
+desired.
+
+## Running the tests
+
+```bash
+npm run test
 ```
 
 ## Contributing
