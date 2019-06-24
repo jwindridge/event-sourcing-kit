@@ -26,7 +26,14 @@ const stores = [
     opts: FILE_STORE_OPTS,
     setup: async () => {
       const filePath = path.resolve(FILE_STORE_OPTS.filepath);
-      await fs.truncate(filePath);
+      if (fs.exists(filePath)) {
+        try {
+          await fs.truncate(filePath);
+        } catch (e) {
+          console.warn('Error encountered during event log truncation:');
+          console.warn(e);
+        }
+      }
     },
     store: FileEventStore,
     type: 'FileEventStore'
