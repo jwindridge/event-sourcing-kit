@@ -1,10 +1,7 @@
 # `@eskit/core`
 
-<<<<<<< HEAD
-=======
 Core functionality for definition of aggregate roots & associated functionality
 
->>>>>>> 3dad40b6534d252640b04c90beb44f487ee37a0f
 ## Usage
 
 - Defining an aggregate
