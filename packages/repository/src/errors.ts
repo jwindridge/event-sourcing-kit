@@ -9,5 +9,6 @@ export class ConcurrentModificationError extends Error {
     const { id, name } = aggregateId;
     const msg = `Expected aggregate ${name}:${id} to be at version ${expectedVersion}, got ${actualVersion}`;
     super(msg);
+    this.name = 'ConcurrentModificationError';
   }
 }
