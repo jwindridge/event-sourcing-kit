@@ -3,6 +3,7 @@ build
 test
 src/**.js
 .idea/*
+*.code-workspace
 packages/*/lib
 
 coverage

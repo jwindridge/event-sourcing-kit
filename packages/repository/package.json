@@ -42,5 +42,5 @@
     "@types/inversify": "^2.0.33",
     "@types/uuid": "^3.4.4"
   },
-  "gitHead": "59b66cf23be69b2b9681635cbcfeeab99ae5f107"
+  "gitHead": "9957f2b4780f2d9f0f62fbce87f4b21050682673"
 }

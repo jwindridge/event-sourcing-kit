@@ -1,5 +1,7 @@
 # `core`
 
+Core functionality for definition of aggregate roots & associated functionality
+
 ## Usage
 
 - Defining an aggregate
