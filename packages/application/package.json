@@ -1,6 +1,6 @@
 {
   "name": "@eskit/application",
-  "version": "3.4.1",
+  "version": "3.4.2",
   "description": "Application-level helpers for the eskit ecosystem",
   "author": "Jonathan Windridge <jonathan.windridge@trium-capital.com>",
   "homepage": "https://github.com/authentik8/eskit",
@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@eskit/core": "^3.4.1",
-    "@eskit/repository": "^3.4.1",
+    "@eskit/repository": "^3.4.2",
     "debug": "^4.1.1",
     "uuid": "^3.3.2"
   },
