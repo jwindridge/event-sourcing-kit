@@ -101,7 +101,7 @@ describe('Repository', () => {
   });
 
   describe('concurrency error handling', () => {
-    const counterWithErrorHandling = createAggregateRoot({
+    const errorHandlingCounterDefinition: IAggregateDefinition<ICounter> = {
       ...definition,
       concurrencyErrorResolver: ({ newEvents, savedEvents }) => {
         // Allow events of different types to be applied concurrently
@@ -119,7 +119,16 @@ describe('Repository', () => {
 
         return newEvents;
       }
-    });
+    };
+
+    const concurrencyErrorResolverSpy = jest.spyOn(
+      errorHandlingCounterDefinition,
+      'concurrencyErrorResolver'
+    );
+
+    const counterWithErrorHandling = createAggregateRoot(
+      errorHandlingCounterDefinition
+    );
 
     let updatedRepository: Repository<ICounter>;
 
@@ -134,12 +143,64 @@ describe('Repository', () => {
     });
 
     it('Should be able to recover from `AppendOnlyStoreConcurrencyError` exceptions if logic is present in the aggregate', async () => {
+      // Save the increment events to the repository
       await updatedRepository.save('abcdef', incrementEvents, 0);
+
+      const OUTDATED_VERSION = 1;
+
+      // Non-conflicting event - domain logic permits name to be changed without affecting
+      // counter value
+      const nameChangedEvent = createEvent('nameChanged', {
+        to: 'updatedName'
+      });
+
+      // Retrieve the events saved to the aggregate since the oudated version number
+      const savedEventsAfterExpectedVersion = await eventStore.loadEvents(
+        {
+          id: 'abcdef',
+          name: counterWithErrorHandling.name
+        },
+        OUTDATED_VERSION
+      );
+
+      // Attempt to save the name changed event at an outdated version (with only increment events since)
       await updatedRepository.save(
         'abcdef',
-        [createEvent('nameChanged', { to: 'updatedName' })],
-        0
+        [nameChangedEvent],
+        OUTDATED_VERSION
       );
+
+      /**
+       * Confirm that the concurrency error resolver is called with the correct arguments:
+       *  - actualState: The most recent state of the aggregate based on the "correct" history from the event store
+       *  - expectedState: The state of the aggregate at the outdated version number
+       *  - savedEvents: The list of events saved to the event store for this aggregate between the outdated & most recent versions
+       *  - newEvents: The list of proposed events referencing the outdated version
+       */
+      expect(concurrencyErrorResolverSpy).toHaveBeenCalledWith({
+        actualState: {
+          exists: true,
+          id: 'abcdef',
+          state: {
+            name: 'defaultCounter',
+            value: 3
+          },
+          version: 3
+        },
+        expectedState: {
+          exists: true,
+          id: 'abcdef',
+          state: {
+            name: 'defaultCounter',
+            value: 1
+          },
+          version: 1
+        },
+        newEvents: [nameChangedEvent],
+        savedEvents: savedEventsAfterExpectedVersion
+      });
+
+      // Retrieve the latest aggregate state
       const aggregate = await repository.getById('abcdef');
 
       // Should have appended the increment events onto existing aggregate state
