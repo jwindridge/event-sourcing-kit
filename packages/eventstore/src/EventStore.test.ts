@@ -1,4 +1,9 @@
-import { createEvent, IAggregateIdentifier, IDomainEvent } from '@eskit/core';
+import {
+  createEvent,
+  IAggregateIdentifier,
+  IDomainEvent,
+  IAggregateEvent
+} from '@eskit/core';
 
 import fs from 'async-file';
 import path from 'path';
@@ -122,6 +127,31 @@ stores.forEach(({ opts, setup, store, type }) => {
         await expect(shouldThrow()).rejects.toThrowError(
           AppendOnlyStoreConcurrencyError
         );
+      });
+
+      it('should emit a `saved` js event for each payload saved to the store', async () => {
+        const eventList: IAggregateEvent[] = [];
+
+        eventStore.on('saved', e => eventList.push(e));
+
+        await eventStore.save(widget1Id, [event1, event2], 0);
+
+        expect(eventList).toMatchObject([
+          {
+            ...event1,
+            aggregate: { ...widget1Id, context: null },
+            id: 1,
+            metadata: undefined,
+            version: 1
+          },
+          {
+            ...event2,
+            aggregate: { ...widget1Id },
+            id: 2,
+            metadata: undefined,
+            version: 2
+          }
+        ]);
       });
     });
 
