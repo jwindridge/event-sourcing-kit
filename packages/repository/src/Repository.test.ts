@@ -156,8 +156,23 @@ describe('Repository', () => {
       await updatedRepository.save('abcdef', incrementEvents, 0);
 
       // Saving events of the same type is not permitted by logic within `resolveConcurrencyErrors', so version mismatch should raise error
-      const shouldThrow = () => repository.save('abcdef', incrementEvents, 0);
+      const shouldThrow = () =>
+        updatedRepository.save('abcdef', incrementEvents, 0);
       await expect(shouldThrow()).rejects.toThrow(ConcurrentModificationError);
+    });
+
+    it('Should throw other exceptions back to the calling function', async () => {
+      class NotAConcurrencyError extends Error {}
+
+      jest
+        .spyOn((updatedRepository as any)._store, 'save')
+        .mockImplementation(() => {
+          throw new NotAConcurrencyError();
+        });
+
+      const shouldThrow = () =>
+        updatedRepository.save('abcdef', incrementEvents, 0);
+      await expect(shouldThrow()).rejects.toThrow(NotAConcurrencyError);
     });
   });
 });
