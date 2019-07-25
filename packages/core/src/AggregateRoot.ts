@@ -9,7 +9,8 @@ import {
   IDomainCommand,
   IDomainEvent,
   IPublishableAggregateState,
-  IServiceRegistry
+  IServiceRegistry,
+  ConcurrencyErrorResolver
 } from './interfaces';
 
 export function createAggregateRoot<T>(

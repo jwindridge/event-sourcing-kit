@@ -56,9 +56,12 @@ class Repository<T> implements IRepository<T> {
     }
   }
 
-  public async getById(id: string): Promise<IAggregateState<T>> {
+  public async getById(
+    id: string,
+    atVersion?: number
+  ): Promise<IAggregateState<T>> {
     const aggregateId = this._getAggregateId(id);
-    const events = await this._store.loadEvents(aggregateId);
+    const events = await this._store.loadEvents(aggregateId, 0, atVersion);
     return this._createInstance(id, events);
   }
 
@@ -74,7 +77,7 @@ class Repository<T> implements IRepository<T> {
     id: string,
     events: IDomainEvent[]
   ): IAggregateState<T> {
-    const { state, version } = this._aggregate.rehydrate(id, events);
+    const { state, version } = this._aggregate.rehydrate(id, events, snapshot);
     return { id, state, version, exists: version > 0 };
   }
 
@@ -96,6 +99,7 @@ class Repository<T> implements IRepository<T> {
     const actualState = await this.getById(aggregateId.id);
     const expectedState = this._createInstance(aggregateId.id, events);
 
+    // Retrieve the list of events that have been saved to this aggregate since the outdated version number
     const savedEvents = await this._store.loadEvents(
       aggregateId,
       expectedVersion

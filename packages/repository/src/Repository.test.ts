@@ -140,6 +140,7 @@ describe('Repository', () => {
         [createEvent('nameChanged', { to: 'updatedName' })],
         0
       );
+
       const aggregate = await repository.getById('abcdef');
 
       // Should have appended the increment events onto existing aggregate state
@@ -174,5 +175,6 @@ describe('Repository', () => {
         updatedRepository.save('abcdef', incrementEvents, 0);
       await expect(shouldThrow()).rejects.toThrow(NotAConcurrencyError);
     });
+
   });
 });

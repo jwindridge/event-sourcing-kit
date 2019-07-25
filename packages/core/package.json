@@ -1,6 +1,6 @@
 {
   "name": "@eskit/core",
-  "version": "3.3.0",
+  "version": "3.4.1",
   "description": "Core portion of the eskit library",
   "author": "Jonathan Windridge <jonathan.windridge@trium-capital.com>",
   "homepage": "https://github.com/authentik8/eskit",
@@ -35,5 +35,6 @@
   },
   "bugs": {
     "url": "https://github.com/authentik8/event-sourcing-kit/issues"
-  }
+  },
+  "gitHead": "9957f2b4780f2d9f0f62fbce87f4b21050682673"
 }
