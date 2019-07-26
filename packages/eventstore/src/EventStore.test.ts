@@ -26,7 +26,19 @@ const stores = [
     opts: FILE_STORE_OPTS,
     setup: async () => {
       const filePath = path.resolve(FILE_STORE_OPTS.filepath);
-      await fs.truncate(filePath);
+      const folder = path.dirname(filePath);
+
+      if (!(await fs.exists(folder))) {
+        await fs.createDirectory(folder);
+      }
+
+      try {
+        await fs.truncate(filePath);
+      } catch (err) {
+        if (!err.message.includes('ENOENT')) {
+          throw err;
+        }
+      }
     },
     store: FileEventStore,
     type: 'FileEventStore'
