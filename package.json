@@ -11,7 +11,7 @@
   "scripts": {
     "build": "lerna run build",
     "lint": "tslint --project . && prettier \"src/**/*.ts\" --list-different",
-    "publish": "run-s build && lerna publish",
+    "release": "run-s lint build test && lerna publish",
     "test": "jest",
     "watch": "jest --watch"
   },
