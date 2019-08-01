@@ -1,6 +1,6 @@
 import 'jest';
 import { createAggregateRoot } from './AggregateRoot';
-import { IAggregateDefinition } from './interfaces';
+import { IAggregateDefinition, IAggregateState } from './interfaces';
 import { createCommand } from './Command';
 import { UnknownCommandError, UnknownEventError, DomainError } from './errors';
 import { createEvent } from './Event';
@@ -196,18 +196,39 @@ describe('AggregateRoot', () => {
   });
 
   describe('rehydrate', () => {
-    it('should reinitialize an aggregate from a series of events', () => {
-      const events = [
-        createEvent('valueSet', { to: 10 }),
-        createEvent('incremented', { by: 2 }),
-        createEvent('incremented', { by: 5 })
-      ];
+    const events = [
+      createEvent('incremented', { by: 9 }),
+      createEvent('incremented', { by: 2 }),
+      createEvent('incremented', { by: 5 })
+    ];
 
+    it('should reinitialize an aggregate from a series of events', () => {
       const aggregateInstance = Counter.rehydrate('aggregateId', events);
       expect(aggregateInstance.id).toBe('aggregateId');
       expect(aggregateInstance.exists).toBe(true);
       expect(aggregateInstance.version).toBe(3);
       expect(aggregateInstance.state).toStrictEqual({ value: 17 });
+    });
+
+    it('should reinitialize an aggregate from a snapshot & a series of events', () => {
+      const snapshotState: IAggregateState<ICounter> = {
+        id: 'aggregateId',
+        exists: true,
+        version: 100,
+        state: { value: 159 }
+      };
+
+      const aggregateInstance = Counter.rehydrate(
+        'aggregateId',
+        events,
+        snapshotState
+      );
+      expect(aggregateInstance.id).toBe('aggregateId');
+      expect(aggregateInstance.exists).toBe(true);
+      expect(aggregateInstance.version).toBe(103);
+      expect(aggregateInstance.state).toStrictEqual({
+        value: 175
+      });
     });
   });
 
@@ -228,6 +249,46 @@ describe('AggregateRoot', () => {
   describe('name', () => {
     it('should expose the name of the aggregate', () => {
       expect(Counter.name).toBe('counter');
+    });
+  });
+
+  describe('snapshots', () => {
+    interface ISerializedCounter {
+      value: string;
+    }
+
+    const counterWithSnapshotsDefinition: IAggregateDefinition<
+      ICounter,
+      ISerializedCounter
+    > = {
+      ...counterDefinition,
+      snapshots: {
+        deserialize: snapshot => ({ value: parseInt(snapshot.value) }),
+        serialize: ({ value }) => ({ value: `${value}` })
+      }
+    };
+
+    const counterWithSnapshots = createAggregateRoot<
+      ICounter,
+      ISerializedCounter
+    >(counterWithSnapshotsDefinition);
+
+    describe('takeSnapshot', () => {
+      it('should convert aggregate state into a snapshot using the `serialize` method from the definition', () => {
+        const counterState: IAggregateState<ICounter> = {
+          exists: true,
+          id: 'aggregateId',
+          version: 25,
+          state: { value: 59 }
+        };
+
+        const snapshot = counterWithSnapshots.takeSnapshot(counterState);
+        expect(snapshot).toStrictEqual({
+          aggregate: { id: 'aggregateId', name: 'counter' },
+          snapshot: { value: '59' },
+          version: 25
+        });
+      });
     });
   });
 });

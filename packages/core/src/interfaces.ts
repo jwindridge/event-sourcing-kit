@@ -87,6 +87,12 @@ export interface IAggregateState<T> {
   version: number;
 }
 
+export interface IAggregateSnapshot<T> {
+  aggregate: IAggregateIdentifier;
+  snapshot: T;
+  version: number;
+}
+
 /**
  * Aggregate state permitting publishing of events
  */
@@ -134,9 +140,30 @@ export type ConcurrencyErrorResolver<T> = (params: {
 }) => IDomainEvent[] | false;
 
 /**
+ * Function to convert the state object of an aggregate into a format suitable for
+ * serialization
+ *
+ * @param state: Aggregate state to serialize
+ * @returns Serialized data representing the current state of this object
+ */
+export type SnapshotSerializer<T, S> = {
+  (state: T): S;
+};
+
+/**
+ * Function to deseriealize an aggregate snapshot back into a state object
+ *
+ * @param snapshot: Serialied snapshot data
+ * @returns Aggregate state object
+ */
+export type SnapshotDeserializer<S, T> = {
+  (snapshot: S): T;
+};
+
+/**
  * Definition of an aggregate root for an entity of type `T`
  */
-export interface IAggregateDefinition<T> {
+export interface IAggregateDefinition<T, S = never> {
   /* Name to use to identify this aggregate */
   name: string;
 
@@ -150,13 +177,18 @@ export interface IAggregateDefinition<T> {
   commands: ICommandHandlerMap<T>;
 
   concurrencyErrorResolver?: ConcurrencyErrorResolver<T>;
+
+  snapshots?: {
+    deserialize: SnapshotDeserializer<S, T>;
+    serialize: SnapshotSerializer<T, S>;
+  };
 }
 
 /**
  * Consistency boundary for atomic transactions.
  *
  */
-export interface IAggregateRoot<T> {
+export interface IAggregateRoot<T, S = {}> {
   /**
    * Name of this aggregate root (unique within context)
    */
@@ -227,4 +259,12 @@ export interface IAggregateRoot<T> {
     newEvents: IDomainEvent[];
     savedEvents: IAggregateEvent[];
   }): IDomainEvent[] | false;
+
+  /**
+   *
+   * @param state
+   */
+  takeSnapshot(state: IAggregateState<T>): IAggregateSnapshot<S>;
+
+  restoreFromSnapshot(snapshot: IAggregateSnapshot<S>): IAggregateState<T>;
 }

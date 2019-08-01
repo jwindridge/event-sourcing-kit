@@ -9,12 +9,13 @@ import {
   IDomainCommand,
   IDomainEvent,
   IPublishableAggregateState,
-  IServiceRegistry
+  IServiceRegistry,
+  IAggregateSnapshot
 } from './interfaces';
 
-export function createAggregateRoot<T>(
-  definition: IAggregateDefinition<T>
-): IAggregateRoot<T> {
+export function createAggregateRoot<T, S = never>(
+  definition: IAggregateDefinition<T, S>
+): IAggregateRoot<T, S> {
   const {
     commands,
     initialState,
@@ -123,12 +124,48 @@ export function createAggregateRoot<T>(
     return resolver(args);
   }
 
+  function takeSnapshot({
+    id,
+    state,
+    version
+  }: IAggregateState<T>): IAggregateSnapshot<S> {
+    const stateSerializer =
+      definition.snapshots!.serialize || (x => (x as any) as S);
+
+    const snapshot: IAggregateSnapshot<S> = {
+      version,
+      aggregate: { id, name: aggregateName },
+      snapshot: stateSerializer(state)
+    };
+
+    return snapshot;
+  }
+
+  function restoreFromSnapshot({
+    aggregate: { id },
+    snapshot,
+    version
+  }: IAggregateSnapshot<S>): IAggregateState<T> {
+    const stateDeserializer = definition.snapshots!.deserialize;
+
+    const aggregateState: IAggregateState<T> = {
+      id,
+      version,
+      exists: true,
+      state: stateDeserializer(snapshot)
+    };
+
+    return aggregateState;
+  }
+
   return {
     applyCommand,
     applyEvent,
     getInitialState,
     rehydrate,
     resolveConcurrencyError,
+    restoreFromSnapshot,
+    takeSnapshot,
     commands: Object.keys(commands),
     name: aggregateName
   };
