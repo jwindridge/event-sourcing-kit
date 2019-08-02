@@ -32,6 +32,9 @@ export interface IAggregateIdentifier {
 
   // Name of the aggregate
   name: string;
+
+  // Context of this aggregate
+  context?: string;
 }
 
 export interface IAggregateCommand extends IDomainCommand {
