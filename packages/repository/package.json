@@ -41,6 +41,5 @@
     "@types/debug": "^4.1.4",
     "@types/inversify": "^2.0.33",
     "@types/uuid": "^3.4.4"
-  },
-  "gitHead": "9957f2b4780f2d9f0f62fbce87f4b21050682673"
+  }
 }
