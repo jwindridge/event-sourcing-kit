@@ -1,9 +1,9 @@
 import 'jest';
 import { createAggregateRoot } from './AggregateRoot';
-import { IAggregateDefinition } from './interfaces';
 import { createCommand } from './Command';
-import { UnknownCommandError, UnknownEventError, DomainError } from './errors';
+import { DomainError, UnknownCommandError, UnknownEventError } from './errors';
 import { createEvent } from './Event';
+import { IAggregateDefinition } from './interfaces';
 
 interface ICounter {
   value: number;
@@ -16,10 +16,6 @@ const delay = async (timeout: number) =>
 
 describe('AggregateRoot', () => {
   const counterDefinition: IAggregateDefinition<ICounter> = {
-    name: 'counter',
-    initialState: {
-      value: 1
-    },
     commands: {
       *double(entity, { data: { times } }) {
         let entityState = entity;
@@ -72,6 +68,10 @@ describe('AggregateRoot', () => {
         entity.publish('valueSet', { to });
       }
     },
+    initialState: {
+      value: 1
+    },
+    name: 'counter',
     reducer: {
       incremented: (state, event) => ({
         value: state.value + event.data.by
@@ -82,16 +82,17 @@ describe('AggregateRoot', () => {
     }
   };
 
-  const Counter = createAggregateRoot(counterDefinition);
+  const counterAggregate = createAggregateRoot(counterDefinition);
 
   const anId = 'anId';
-  const initialInstance = Counter.getInitialState(anId);
+  const initialInstance = counterAggregate.getInitialState(anId);
 
   describe('applyCommand', () => {
     it('should throw an error if called with an unknown command type', async () => {
       const command = createCommand('__unknown__', 0);
 
-      const func = async () => Counter.applyCommand(initialInstance, command);
+      const func = async () =>
+        counterAggregate.applyCommand(initialInstance, command);
 
       await expect(func()).rejects.toThrow(UnknownCommandError);
     });
@@ -99,7 +100,10 @@ describe('AggregateRoot', () => {
     it('should process simple command handlers', async () => {
       const command = createCommand('increment', 0);
 
-      const events = await Counter.applyCommand(initialInstance, command);
+      const events = await counterAggregate.applyCommand(
+        initialInstance,
+        command
+      );
 
       expect(events.length).toBe(1);
       expect(events).toStrictEqual([
@@ -112,7 +116,10 @@ describe('AggregateRoot', () => {
 
     it('should process asynchronous command handlers', async () => {
       const command = createCommand('incrementAsync', 0, { by: 1 });
-      const events = await Counter.applyCommand(initialInstance, command);
+      const events = await counterAggregate.applyCommand(
+        initialInstance,
+        command
+      );
 
       expect(events.length).toBe(1);
       expect(events).toStrictEqual([createEvent('incremented', { by: 1 })]);
@@ -120,7 +127,10 @@ describe('AggregateRoot', () => {
 
     it('should process generator command handlers', async () => {
       const command = createCommand('double', 0, { times: 2 });
-      const events = await Counter.applyCommand(initialInstance, command);
+      const events = await counterAggregate.applyCommand(
+        initialInstance,
+        command
+      );
 
       expect(events.length).toBe(2);
       expect(events[0]).toStrictEqual(createEvent('incremented', { by: 1 }));
@@ -129,7 +139,10 @@ describe('AggregateRoot', () => {
 
     it('should process asynchronous generator command handlers', async () => {
       const command = createCommand('doubleAsync', 0, { times: 2 });
-      const events = await Counter.applyCommand(initialInstance, command);
+      const events = await counterAggregate.applyCommand(
+        initialInstance,
+        command
+      );
 
       expect(events.length).toBe(2);
       expect(events).toStrictEqual([
@@ -141,27 +154,38 @@ describe('AggregateRoot', () => {
     describe('array command handlers', () => {
       it('should not call subsequent handlers after an error', async () => {
         const command = createCommand('incrementByEven', 0, { by: 3 });
-        const func = () => Counter.applyCommand(initialInstance, command);
+        const func = () =>
+          counterAggregate.applyCommand(initialInstance, command);
 
         await expect(func()).rejects.toThrowError({
-          name: 'DomainError',
-          message: 'Must be even'
+          message: 'Must be even',
+          name: 'DomainError'
         });
       });
 
-      it('should process command handlers with arrays', () => {});
+      it('should process command handlers with arrays', async () => {
+        const command = createCommand('incrementByEven', 0, { by: 6 });
+        const events = await counterAggregate.applyCommand(
+          initialInstance,
+          command
+        );
+
+        expect(events.length).toBe(1);
+        expect(events).toStrictEqual([createEvent('incremented', { by: 6 })]);
+      });
     });
   });
 
   describe('applyEvent', () => {
     it('should throw an error if called with an unknown event type', async () => {
-      const event = createEvent('__unknown__');
-      const func = async () => Counter.applyEvent(initialInstance, event);
+      const unknownEvent = createEvent('__unknown__');
+      const func = async () =>
+        counterAggregate.applyEvent(initialInstance, unknownEvent);
       await expect(func()).rejects.toThrow(UnknownEventError);
     });
 
     const event = createEvent('incremented', { by: 3 });
-    const instance = Counter.applyEvent(initialInstance, event);
+    const instance = counterAggregate.applyEvent(initialInstance, event);
 
     it(`shouldn't change the aggregate id`, () => {
       expect(instance.id).toBe(initialInstance.id);
@@ -203,7 +227,10 @@ describe('AggregateRoot', () => {
         createEvent('incremented', { by: 5 })
       ];
 
-      const aggregateInstance = Counter.rehydrate('aggregateId', events);
+      const aggregateInstance = counterAggregate.rehydrate(
+        'aggregateId',
+        events
+      );
       expect(aggregateInstance.id).toBe('aggregateId');
       expect(aggregateInstance.exists).toBe(true);
       expect(aggregateInstance.version).toBe(3);
@@ -213,7 +240,7 @@ describe('AggregateRoot', () => {
 
   describe('commands', () => {
     it('should expose a list of the available commands', () => {
-      expect(Counter.commands).toEqual([
+      expect(counterAggregate.commands).toEqual([
         'double',
         'doubleAsync',
         'increment',
@@ -227,7 +254,7 @@ describe('AggregateRoot', () => {
 
   describe('name', () => {
     it('should expose the name of the aggregate', () => {
-      expect(Counter.name).toBe('counter');
+      expect(counterAggregate.name).toBe('counter');
     });
   });
 });

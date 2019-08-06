@@ -22,11 +22,11 @@
 		"url": "https://github.com/authentik8/event-sourcing-kit/issues"
 	},
 	"scripts": {
-    "clean": "trash lib",
-    "build": "run-s clean && run-s build:*",
-    "build:tsc": "tsc",
-    "test": "echo \"Error: run tests from root\" && exit 1"
-  },
+		"clean": "trash lib",
+		"build": "run-s clean && run-s build:*",
+		"build:tsc": "tsc",
+		"test": "echo \"Error: run tests from root\" && exit 1"
+	},
 	"dependencies": {
 		"@eskit/core": "^3.4.4",
 		"amqplib": "^0.5.5",
@@ -36,6 +36,7 @@
 	"devDependencies": {
 		"@types/amqplib": "^0.5.13",
 		"@types/debug": "^4.1.4",
+		"@types/hapi__joi": "^15.0.3",
 		"@types/jest": "^24.0.16",
 		"jest": "^24.8.0"
 	}

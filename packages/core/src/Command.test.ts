@@ -1,5 +1,5 @@
-import 'jest';
 import Joi from '@hapi/joi';
+import 'jest';
 
 import { createCommand, createCommandValidator } from './Command';
 import { CommandValidationError } from './errors';
@@ -8,20 +8,20 @@ describe('createCommand', () => {
   it('should generate a command from a name & version', () => {
     const command = createCommand('commandName', 123);
     expect(command).toStrictEqual({
-      name: 'commandName',
-      version: 123,
       data: undefined,
-      userId: undefined
+      name: 'commandName',
+      userId: undefined,
+      version: 123
     });
   });
 
   it('should generate a command from a name, data & version', () => {
     const command = createCommand('commandName', 456, { foo: 'bar' });
     expect(command).toStrictEqual({
-      name: 'commandName',
-      version: 456,
       data: { foo: 'bar' },
-      userId: undefined
+      name: 'commandName',
+      userId: undefined,
+      version: 456
     });
   });
 
@@ -33,10 +33,10 @@ describe('createCommand', () => {
       'userId123'
     );
     expect(command).toStrictEqual({
-      name: 'commandName',
-      version: 789,
       data: { foo: 'bar' },
-      userId: 'userId123'
+      name: 'commandName',
+      userId: 'userId123',
+      version: 789
     });
   });
 });
@@ -49,8 +49,8 @@ describe('createCommandValidator', () => {
 
     it('should do nothing if passed a valid command', () => {
       const command = createCommand('validCommand', 1, {
-        foo: 123,
-        dt: '2019-05-15'
+        dt: '2019-05-15',
+        foo: 123
       });
       const validatorResult = validator(null as any, command, null as any);
       expect(validatorResult).toBe(undefined);

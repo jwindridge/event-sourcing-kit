@@ -21,7 +21,9 @@
   "devDependencies": {
     "@types/debug": "^4.1.4",
     "@types/hapi__joi": "^15.0.1",
-    "ava": "^1.4.1"
+    "@types/jest": "^24.0.17",
+    "ava": "^1.4.1",
+    "jest": "^24.8.0"
   },
   "repository": {
     "type": "git",

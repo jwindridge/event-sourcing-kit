@@ -10,7 +10,7 @@
   "keywords": [],
   "scripts": {
     "build": "lerna run build",
-    "lint": "tslint --project . && prettier \"src/**/*.ts\" --list-different",
+    "lint": "tslint --project . && prettier \"packages/*/src/**/*.ts\" --list-different",
     "lint:fix": "tslint --project . --fix && prettier \"src/**/*.ts\" --fix",
     "release": "run-s lint build test && lerna publish",
     "test": "jest",
