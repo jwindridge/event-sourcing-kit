@@ -1,6 +1,6 @@
 {
 	"name": "@eskit/messaging",
-	"version": "3.4.5",
+	"version": "3.5.0",
 	"description": "Messaging infrastructure for communication between services",
 	"author": "Jonathan Windridge <jonathan.windridge@trium-capital.com>",
 	"homepage": "https://github.com/authentik8/event-sourcing-kit",
@@ -28,7 +28,7 @@
 		"test": "echo \"Error: run tests from root\" && exit 1"
 	},
 	"dependencies": {
-		"@eskit/core": "^3.4.4",
+		"@eskit/core": "^3.5.0",
 		"amqplib": "^0.5.5",
 		"debug": "^4.1.1",
 		"inversify": "^5.0.1"
