@@ -30,6 +30,7 @@
 	"dependencies": {
 		"@eskit/core": "^3.5.0",
 		"amqplib": "^0.5.5",
+		"async-file": "^2.0.2",
 		"debug": "^4.1.1",
 		"inversify": "^5.0.1"
 	},

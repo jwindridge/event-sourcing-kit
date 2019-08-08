@@ -35,6 +35,8 @@ class AMQPDomainEventPublisher implements IDomainEventPublisher {
   protected _connection?: amqp.Connection;
   protected _channel?: amqp.Channel;
 
+  private _started: boolean = false;
+
   public constructor(opts: {
     mapEventToRoutingKey?: (event: IAggregateEvent) => string;
     exchange: IAMQPExchangeOpts;
@@ -52,6 +54,7 @@ class AMQPDomainEventPublisher implements IDomainEventPublisher {
 
   public async start(): Promise<void> {
     debug(`Starting AMQPDomainEventPublisher`);
+    this._started = true;
 
     // Connect to exchange
     this._connection = await connect(this._url);
@@ -65,6 +68,10 @@ class AMQPDomainEventPublisher implements IDomainEventPublisher {
   }
 
   public async publish(event: IAggregateEvent): Promise<void> {
+    if (!this._started) {
+      await this.start();
+    }
+
     debug(`Publish event via AMQP: ${event}`);
 
     const routingKey = this._mapEventToRoutingKey(event);
