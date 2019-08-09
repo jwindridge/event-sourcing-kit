@@ -89,7 +89,7 @@ export class FileStore implements IAppendOnlyStore {
         dirExists = true;
       }
     }
-    await fs.open(this._config.filepath, 'a');
+    await fs.writeTextFile(this._config.filepath, '', 'utf8', 'a');
   }
 
   private async _readFileContents(): Promise<IStreamData[]> {
