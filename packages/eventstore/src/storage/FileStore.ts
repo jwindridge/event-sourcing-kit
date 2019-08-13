@@ -100,10 +100,11 @@ export class FileStore implements IAppendOnlyStore {
       'utf8',
       'r'
     );
-    return fileContents
-      .split('\n')
-      .filter(s => s.length > 0)
-      .map(this._parseRecord);
+
+    const lines = fileContents.split('\n');
+    debug(`Loaded contents of file ${this._config.filepath} (${lines} lines)`);
+
+    return lines.filter(s => s.length > 0).map(this._parseRecord);
   }
 
   private _createRecord = ({
