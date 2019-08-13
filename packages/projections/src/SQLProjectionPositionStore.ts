@@ -26,6 +26,10 @@ class SQLProjectionPositionStore implements IProjectionPositionStore {
   // Query interface for the projection store's SQL table
   private _collection?: QueryInterface;
 
+  protected get collection(): QueryInterface {
+    return this._collection!.clone();
+  }
+
   // Store the `knex` instance used to connect to the database
   private _knex: Knex;
 
@@ -41,26 +45,31 @@ class SQLProjectionPositionStore implements IProjectionPositionStore {
   public async load(identifier: string): Promise<number> {
     await this._ensureTable(this._knex);
     debug(`Load stored position for ${identifier}`);
-    const position: number[] = await this._collection!.pluck('position')
-      .where({ identifier })
-      .then();
+    const position: number[] = await this.collection.pluck('position').where({
+      identifier
+    });
     return position.length ? position[0] : 0;
   }
 
   public async update(identifier: string, position: number): Promise<void> {
     await this._ensureTable(this._knex);
-    const updated = (await this._collection!.where({ identifier })
+    const updated: string[] = await this.collection
+      .where({
+        identifier
+      })
+      .update({ position }, ['identifier']);
 
-      .update({ position }, ['identifier'])
-      .then()) as string[];
+    debug('Update result: ', updated);
+
     debug(
       `Updated position of ${identifier} to ${position} (${
         updated.length
       } row(s))`
     );
+
     if (updated.length === 0) {
       debug(`No saved position for ${identifier}, inserting new row`);
-      await this._collection!.insert({ identifier, position });
+      await this.collection.insert({ identifier, position });
     }
   }
 
