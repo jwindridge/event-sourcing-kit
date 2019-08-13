@@ -1,6 +1,6 @@
 {
   "name": "@eskit/projections",
-  "version": "3.6.3",
+  "version": "3.6.4",
   "description": "Library for constructing event-sourced projections for the eskit ecosystem",
   "author": "Jonathan Windridge <jonathan.windridge@trium-capital.com>",
   "homepage": "https://github.com/authentik8/event-sourcing-kit#readme",
@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@eskit/core": "^3.6.2",
-    "@eskit/eventstore": "^3.6.3",
+    "@eskit/eventstore": "^3.6.4",
     "@types/debug": "^4.1.4",
     "debug": "4.1.1",
     "inversify": "^5.0.1",
