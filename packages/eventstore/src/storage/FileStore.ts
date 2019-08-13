@@ -102,7 +102,9 @@ export class FileStore implements IAppendOnlyStore {
     );
 
     const lines = fileContents.split('\n');
-    debug(`Loaded contents of file ${this._config.filepath} (${lines} lines)`);
+    debug(
+      `Loaded contents of file ${this._config.filepath} (${lines.length} lines)`
+    );
 
     return lines.filter(s => s.length > 0).map(this._parseRecord);
   }
