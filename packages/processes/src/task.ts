@@ -1,12 +1,14 @@
 import uuid from 'uuid';
 
 import {
+  EffectState,
   IEffect,
   IEffectResult,
   ITask,
   ITaskStateTracker,
   ITaskStateTrackerFactory,
-  SavedEffect
+  IPendingEffectState,
+  ISettledEffectState
 } from './interfaces';
 
 type IdentifiedEffect = IEffect & { id: string };
@@ -79,32 +81,49 @@ export function createTask(processId: string = uuid.v4()): ITask {
 export function createTaskTrackerFactory(): ITaskStateTrackerFactory {
   let tasks: {
     [s: string]: {
-      pending: IdentifiedEffect[];
-      settled: IEffectResult[];
+      pending: IPendingEffectState[];
+      settled: ISettledEffectState[];
     };
   } = {};
 
   function get(taskId: string): ITaskStateTracker {
     let effectIndex: number = 0;
 
-    function saveEffect<T extends IEffect>(
-      effect: T
-    ): { pending?: SavedEffect<T>; settled?: IEffectResult } {
+    function saveEffect<T extends IEffect>(effect: T): EffectState {
       const taskState = tasks[taskId] || { pending: [], settled: [] };
 
       if (effectIndex < taskState.settled.length) {
         const settled = taskState.settled[effectIndex];
         effectIndex += 1;
-        return { settled };
+        return settled;
       }
 
       const effectId = uuid.v4();
 
+      const pendingEffect: IPendingEffectState = {
+        effect,
+        id: effectId,
+        state: 'PENDING',
+        markCancelled: () => {
+          const taskState = tasks[taskId];
+          const effectIdx = taskState.pending.findIndex(v => v.id === effectId);
+
+          tasks[taskId] = {
+            ...taskState,
+            pending: [
+              ...taskState.pending.slice(0, effectIdx),
+              ...taskState.pending.slice(effectIdx + 1)
+            ]
+          };
+        },
+        markSettled: (result: IEffectResult) => markSettled(effectId, result)
+      };
+
       tasks[taskId] = {
         ...taskState,
-        pending: [...taskState.pending, { ...effect, id: effectId }]
+        pending: [...taskState.pending, pendingEffect]
       };
-      return { pending: { ...effect, id: effectId } };
+      return pendingEffect;
     }
 
     function markSettled(effectId: string, result: IEffectResult) {

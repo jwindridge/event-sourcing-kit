@@ -9,21 +9,31 @@ type RecursivePartial<T> = {
     ? RecursivePartial<T[P]>
     : T[P]
 };
-export type SavedEffect<T extends IEffect> = T & {
-  id: string;
-};
 
 export type AggregateEventPatternMatcher = RecursivePartial<IAggregateEvent>;
 
+export interface ISettledEffectState {
+  id: string;
+  result: IEffectResult;
+  state: 'SETTLED';
+}
+
+export interface IPendingEffectState {
+  id: string;
+  state: 'PENDING';
+  effect: IEffect;
+  markCancelled: () => void;
+  markSettled: (result: IEffectResult) => void;
+}
+
+export type EffectState = ISettledEffectState | IPendingEffectState;
+
 export interface ITaskStateTracker {
-  saveEffect<T extends IEffect>(
-    effect: T
-  ): { pending?: SavedEffect<T>; settled?: IEffectResult };
-  markSettled(effectId: string, result: IEffectResult): void;
+  saveEffect<T extends IEffect>(effect: T): EffectState;
   remove(): void;
 
-  getPendingEffects(): IEffect[];
-  getSettledEffects(): IEffectResult[];
+  getPendingEffects(): IPendingEffectState[];
+  getSettledEffects(): ISettledEffectState[];
 }
 
 export interface ITaskStateTrackerFactory {
@@ -115,6 +125,11 @@ export interface IDelayEffect extends IEffect {
 export interface IDispatchEffect extends IEffect {
   type: 'DISPATCH';
   payload: IApplicationCommand;
+}
+
+export interface IRunningEffect extends IEffect {
+  cancel: () => void;
+  complete: (result: any) => void;
 }
 
 export interface IEffectResult {

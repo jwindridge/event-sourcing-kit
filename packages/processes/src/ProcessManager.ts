@@ -109,6 +109,33 @@ export function createProcessManager(opts: {
           );
           break;
         }
+        case 'RACE': {
+          const effects = effect.payload;
+          const runningEffects: { [effectName: string]: any } = {};
+
+          const cancelOthersCb = (completedEffect: string) => (result: any) => {
+            for (const key of Object.keys(effects)) {
+              if (key !== completedEffect) {
+                runningEffects[key].cancel();
+              }
+            }
+            cb({
+              data: {
+                [completedEffect]: result
+              },
+              id: effect.id,
+              type: 'RACE'
+            });
+          };
+
+          const raceEffects: Array<[string, IEffect]> = Object.entries(effects);
+
+          for (const [name, effect] of raceEffects) {
+            runEffect(effect as any, cancelOthersCb(name));
+          }
+
+          break;
+        }
         case 'SPAWN': {
           const { args: processArgs, name } = effect.payload;
 
