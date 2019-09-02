@@ -13,16 +13,14 @@ const debug = debugModule('eskit:messaging:amqp:AMQPDomainEventPublisher');
 export function mapEventToRoutingKey(event: IAggregateEvent): string {
   const {
     aggregate: {
-      context: aggregateContext,
+      context: aggregateContext = 'default',
       id: aggregateId,
       name: aggregateName
     },
     name: eventName
   } = event;
 
-  const optionalContext = aggregateContext ? `${aggregateContext}.` : '';
-
-  return `${optionalContext}${aggregateName}.${eventName}.${aggregateId}`;
+  return `${aggregateContext}.${aggregateName}.${eventName}.${aggregateId}`;
 }
 
 @injectable()

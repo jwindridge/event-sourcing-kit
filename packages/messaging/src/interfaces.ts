@@ -20,6 +20,21 @@ export interface IDomainEventSubscriber extends EventEmitter {
   start(): Promise<void>;
 
   /**
+   * Subscribe to events matching a given pattern
+   * @param pattern Implementation-specific string pattern
+   * @param patterns Additional patterns to subscribe to
+   * @returns subscribe
+   */
+  subscribe(pattern: string, ...patterns: string[]): Promise<void>;
+
+  /**
+   * Unsubscribe from events matching a given pattern
+   * @param pattern Implementation-specifc string pattern
+   * @returns unsubscribe
+   */
+  unsubscribe(pattern: string): Promise<void>;
+
+  /**
    * Add listener function to be invoked on receipt of new domain events
    * @param eventName Event type
    * @param listener Function to be triggered when an event is received

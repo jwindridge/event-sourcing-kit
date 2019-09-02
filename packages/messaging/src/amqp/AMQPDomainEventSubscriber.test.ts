@@ -38,10 +38,10 @@ describe('AMQPDomainEventSubscriber', () => {
   beforeEach(() => {
     // Create a new AMQPDomainEventSubscriber instance before each test
     subscriber = new AMQPDomainEventSubscriber({
-      eventTopicKeys: [eventTopicKey1, eventTopicKey2],
       exchange: {
         name: exchangeName
       },
+      initialSubscriptions: [eventTopicKey1, eventTopicKey2],
       url: amqpUrl
     });
   });
