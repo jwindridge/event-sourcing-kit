@@ -17,13 +17,13 @@ describe('AMQPDomainEventSubscriber', () => {
 
   let subscriber: AMQPDomainEventSubscriber;
 
-  const mockQueue = {
-    queue: jest.fn()
+  const assertQueueResult = {
+    queue: 'asdglkunaskljgbnlkabh'
   };
 
   const mockChannel: Partial<amqp.Channel> = {
     assertExchange: jest.fn(),
-    assertQueue: jest.fn().mockResolvedValue(mockQueue),
+    assertQueue: jest.fn().mockResolvedValue(assertQueueResult),
     bindQueue: jest.fn(),
     consume: jest.fn()
   };
@@ -38,10 +38,10 @@ describe('AMQPDomainEventSubscriber', () => {
   beforeEach(() => {
     // Create a new AMQPDomainEventSubscriber instance before each test
     subscriber = new AMQPDomainEventSubscriber({
-      eventTopicKeys: [eventTopicKey1, eventTopicKey2],
       exchange: {
         name: exchangeName
       },
+      initialSubscriptions: [eventTopicKey1, eventTopicKey2],
       url: amqpUrl
     });
   });
@@ -67,12 +67,12 @@ describe('AMQPDomainEventSubscriber', () => {
         exclusive: true
       });
       expect(mockChannel.bindQueue).toHaveBeenCalledWith(
-        mockQueue.queue,
+        '',
         exchangeName,
         eventTopicKey1
       );
       expect(mockChannel.bindQueue).toHaveBeenCalledWith(
-        mockQueue.queue,
+        '',
         exchangeName,
         eventTopicKey2
       );
