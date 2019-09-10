@@ -48,7 +48,7 @@ class AMQPDomainEventSubscriber extends EventEmitter
    */
   public constructor(opts: {
     exchange: IAMQPExchangeOpts;
-    initialSubscriptions: string[];
+    initialSubscriptions?: string[];
     queueName?: string;
     url: string | Options.Connect;
   }) {
