@@ -17,8 +17,10 @@ describe('AMQPDomainEventSubscriber', () => {
 
   let subscriber: AMQPDomainEventSubscriber;
 
+  const dummyGeneratedQueueName = 'asdglkunaskljgbnlkabh';
+
   const assertQueueResult = {
-    queue: 'asdglkunaskljgbnlkabh'
+    queue: dummyGeneratedQueueName
   };
 
   const mockChannel: Partial<amqp.Channel> = {
@@ -67,12 +69,12 @@ describe('AMQPDomainEventSubscriber', () => {
         exclusive: true
       });
       expect(mockChannel.bindQueue).toHaveBeenCalledWith(
-        '',
+        dummyGeneratedQueueName,
         exchangeName,
         eventTopicKey1
       );
       expect(mockChannel.bindQueue).toHaveBeenCalledWith(
-        '',
+        dummyGeneratedQueueName,
         exchangeName,
         eventTopicKey2
       );

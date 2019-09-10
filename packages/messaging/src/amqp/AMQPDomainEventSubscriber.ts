@@ -81,6 +81,13 @@ class AMQPDomainEventSubscriber extends EventEmitter
       exchangeName: this.exchangeOpts.name
     });
 
+    const q = await this.channel!.assertQueue(this.queueName, {
+      exclusive: true
+    });
+
+    // Re-assign queueName, as if no queue name specified in `opts` this will have been automatically generated
+    this.queueName = q.queue;
+
     this._started = true;
 
     // Subscribe to events
@@ -88,12 +95,6 @@ class AMQPDomainEventSubscriber extends EventEmitter
       await this.subscribe(pattern);
     }
 
-    const q = await this.channel!.assertQueue(this.queueName, {
-      exclusive: true
-    });
-
-    // Re-assign queueName, as if no queue name specified in `opts` this will have been automatically generated
-    this.queueName = q.queue;
     this.channel!.consume(this.queueName, this.onMessage);
   }
 
