@@ -1,6 +1,6 @@
 {
 	"name": "@eskit/messaging",
-	"version": "3.7.2",
+	"version": "3.7.3",
 	"description": "Messaging infrastructure for communication between services",
 	"author": "Jonathan Windridge <jonathan.windridge@trium-capital.com>",
 	"homepage": "https://github.com/authentik8/event-sourcing-kit",
