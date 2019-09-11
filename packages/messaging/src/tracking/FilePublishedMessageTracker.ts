@@ -5,14 +5,9 @@ import { injectable } from 'inversify';
 import { dirname } from 'path';
 
 import {
-  IPublishedMessageTracker,
-  IPublishedMessageTrackerOpts
+  IFilePublishedMessageTrackerOpts,
+  IPublishedMessageTracker
 } from './interfaces';
-
-export interface IFilePublishedMessageTrackerOpts
-  extends IPublishedMessageTrackerOpts {
-  filepath: string;
-}
 
 interface IFilePublishedMessageStore {
   [s: string]: {

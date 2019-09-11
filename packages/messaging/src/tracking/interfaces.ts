@@ -7,6 +7,11 @@ export interface IPublishedMessageTrackerOpts {
   name: string;
 }
 
+export interface IFilePublishedMessageTrackerOpts
+  extends IPublishedMessageTrackerOpts {
+  filepath: string;
+}
+
 /**
  * Interface for persisting record of which events have already been published
  */
