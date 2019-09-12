@@ -1,6 +1,6 @@
 {
   "name": "@eskit/repository",
-  "version": "3.7.0",
+  "version": "3.7.5",
   "description": "Aggregate repository implementations for the eskit ecosystem",
   "author": "Jonathan Windridge <jonathan.windridge@trium-capital.com>",
   "homepage": "https://github.com/authentik8/event-sourcing-kit#readme",
