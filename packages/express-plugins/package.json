@@ -1,6 +1,6 @@
 {
   "name": "@eskit/express-plugins",
-  "version": "3.7.5",
+  "version": "3.7.6",
   "description": "Express REST API plugins to help with creating HTTP interfaces to the eskit library",
   "author": "Jonathan Windridge <jonathan.windridge@trium-capital.com>",
   "homepage": "https://github.com/authentik8/event-sourcing-kit#readme",
@@ -18,7 +18,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@eskit/application": "^3.7.5",
+    "@eskit/application": "^3.7.6",
     "@eskit/core": "^3.7.0",
     "@eskit/eventstore": "^3.7.0",
     "debug": "^4.1.1",
