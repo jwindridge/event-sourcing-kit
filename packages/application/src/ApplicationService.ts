@@ -79,8 +79,14 @@ abstract class ApplicationService implements IApplicationService {
 
     const metadata = this._generateMetadata(aggregateCommand);
 
-    // Save the events emitted from the aggregate instance to the repository
-    await repository.save(id, events, version, metadata);
+    if (events.length) {
+      // Save the events emitted from the aggregate instance to the repository
+      await repository.save(id, events, version, metadata);
+    } else {
+      debug(
+        `Aggregate command ${name}.${command.name} didn't produce any events`
+      );
+    }
 
     // Return the aggregate id (since it may have been newly generated)
     return { id };
