@@ -40,10 +40,12 @@ class Repository<T> implements IRepository<T> {
   ) {
     const aggregateId = this._getAggregateId(id);
     try {
-      return await this._store.save(aggregateId, events, version, metadata);
+      await this._store.save(aggregateId, events, version, metadata);
+      // New version is the current aggregate version plus the number of additional events
+      return version + events.length;
     } catch (e) {
       if (e instanceof AppendOnlyStoreConcurrencyError) {
-        await this._handleConcurrencyError({
+        return this._handleConcurrencyError({
           aggregateId,
           events,
           metadata,
@@ -94,7 +96,7 @@ class Repository<T> implements IRepository<T> {
     events: IDomainEvent[];
     expectedVersion: number;
     metadata?: object;
-  }) {
+  }): Promise<number> {
     debug(`Handling concurrency error for ${aggregateId.name}`);
 
     // Retrieve the current state of the aggregate from the event store
@@ -123,7 +125,7 @@ class Repository<T> implements IRepository<T> {
         expectedVersion
       );
     } else {
-      await this.save(aggregateId.id, resolveResult, actualVersion, metadata);
+      return this.save(aggregateId.id, resolveResult, actualVersion, metadata);
     }
   }
 }

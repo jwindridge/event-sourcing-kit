@@ -24,14 +24,14 @@ export interface IRepository<T> {
    * @param events List of events to save to this aggregate's stream
    * @param version Optimistic currency lock - will reject if event stream modified in parallel
    * @param metadata Metadata to be associated with this array of events
-   * @returns When events successfully saved
+   * @returns New version number of the aggregate event stream
    */
   save(
     id: string,
     events: IDomainEvent[],
     version: number,
     metadata?: object
-  ): Promise<void>;
+  ): Promise<number>;
 }
 
 /**
