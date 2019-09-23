@@ -52,7 +52,7 @@ abstract class ApplicationService implements IApplicationService {
    */
   public async applyCommand(
     command: IApplicationCommand | IAggregateCommand
-  ): Promise<{ id: string }> {
+  ): Promise<{ id: string; version: number }> {
     const aggregateCommand = this._convertToAggregateCommand(command);
 
     const {
@@ -79,17 +79,20 @@ abstract class ApplicationService implements IApplicationService {
 
     const metadata = this._generateMetadata(aggregateCommand);
 
+    let newVersion: number;
+
     if (events.length) {
       // Save the events emitted from the aggregate instance to the repository
-      await repository.save(id, events, version, metadata);
+      newVersion = await repository.save(id, events, version, metadata);
     } else {
       debug(
         `Aggregate command ${name}.${command.name} didn't produce any events`
       );
+      newVersion = version;
     }
 
     // Return the aggregate id (since it may have been newly generated)
-    return { id };
+    return { id, version: newVersion };
   }
 
   protected _convertToAggregateCommand = ({

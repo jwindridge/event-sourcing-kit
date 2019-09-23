@@ -17,5 +17,5 @@ export interface IApplicationService {
    */
   applyCommand(
     command: IApplicationCommand | IAggregateCommand
-  ): Promise<{ id: string }>;
+  ): Promise<{ id: string; version: number }>;
 }
