@@ -34,7 +34,7 @@ This repository uses [SemVer]() for versioning. For the available versions, see 
 
 ## Authors
 
-- Jonathan Windridge - Project lead - [Trium Capital](https://trium-capital.com)
+- Jonathan Windridge
 
 ## License
 
