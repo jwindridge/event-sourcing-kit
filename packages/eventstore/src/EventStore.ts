@@ -96,6 +96,25 @@ class EventStore extends EventEmitter implements IEventStore {
     return data.map(this._convertToEvent);
   }
 
+  public async loadAllEventsByTimestamp({
+    afterTs,
+    beforeTs
+  }: {
+    afterTs?: number;
+    beforeTs?: number;
+  }) {
+    debug(
+      `Loading events from across all streams, between ${afterTs ||
+        'start'} and ${beforeTs || 'now'}`
+    );
+
+    const data = await this._storage.readAllRecordsInRange({
+      afterTs,
+      beforeTs
+    });
+    return data.map(this._convertToEvent);
+  }
+
   /**
    * Convert an aggregate id to a stream identifier
    * @param agggregateId - Aggregate identifier

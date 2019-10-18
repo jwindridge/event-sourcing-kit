@@ -5,7 +5,12 @@ import { injectable } from 'inversify';
 import { dirname } from 'path';
 
 import { AppendOnlyStoreConcurrencyError } from './errors';
-import { IAppendOnlyStore, IFileStoreConfig, IStreamData } from './interfaces';
+import {
+  IAppendOnlyStore,
+  IFileStoreConfig,
+  IStreamData,
+  StreamDataPredicate
+} from './interfaces';
 
 const debug = debugModule('eskit:eventstore:FileStorage');
 
@@ -48,6 +53,37 @@ export class FileStore implements IAppendOnlyStore {
 
     debug(`Reading ${limit || 'all'} records starting at ${skip || 0}`);
     return allRecords.slice(skip).slice(0, limit);
+  }
+
+  public async readAllRecordsInRange({
+    afterTs,
+    beforeTs
+  }: {
+    afterTs?: number;
+    beforeTs?: number;
+  }) {
+    /*
+     * TODO: Refactor implementation as this is inefficient, particularly with
+     * large event stores
+     */
+    debug(`Load all records`);
+    const allRecords = await this._readFileContents();
+    debug(`Loaded ${allRecords.length} records`);
+
+    debug(
+      `Filtering for records after ${afterTs ||
+        'beginning of time'} & before ${beforeTs || 'end of time'}`
+    );
+
+    // Predicate function checking `before` condition if defined
+    const pBefore: StreamDataPredicate = e =>
+      beforeTs === undefined || e.timestamp < beforeTs;
+
+    // Predicate function checking `after` condition if defined
+    const pAfter: StreamDataPredicate = e =>
+      afterTs === undefined || e.timestamp > afterTs;
+
+    return allRecords.filter(record => pBefore(record) && pAfter(record));
   }
 
   public async readRecords(streamId: string, after?: number, limit?: number) {

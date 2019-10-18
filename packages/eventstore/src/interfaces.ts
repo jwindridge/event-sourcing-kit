@@ -62,4 +62,9 @@ export interface IEventStore extends EventEmitter {
    * @returns all events
    */
   loadAllEvents(skip?: number, limit?: number): Promise<IAggregateEvent[]>;
+
+  loadAllEventsByTimestamp(opts: {
+    afterTs?: number;
+    beforeTs?: number;
+  }): Promise<IAggregateEvent[]>;
 }

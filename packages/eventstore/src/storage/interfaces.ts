@@ -10,6 +10,10 @@ export interface IAppendOnlyStore {
     limit?: number
   ): Promise<IStreamData[]>;
   readAllRecords(skip?: number, limit?: number): Promise<IStreamData[]>;
+  readAllRecordsInRange(args: {
+    beforeTs?: number;
+    afterTs?: number;
+  }): Promise<IStreamData[]>;
 }
 
 export interface IStreamData {
@@ -23,3 +27,5 @@ export interface IStreamData {
 export interface IFileStoreConfig {
   filepath: string;
 }
+
+export type StreamDataPredicate = (e: IStreamData) => boolean;

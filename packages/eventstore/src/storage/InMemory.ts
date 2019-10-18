@@ -1,7 +1,11 @@
 import { injectable } from 'inversify';
 
 import { AppendOnlyStoreConcurrencyError } from './errors';
-import { IAppendOnlyStore, IStreamData } from './interfaces';
+import {
+  IAppendOnlyStore,
+  IStreamData,
+  StreamDataPredicate
+} from './interfaces';
 
 @injectable()
 export class InMemoryStore implements IAppendOnlyStore {
@@ -36,6 +40,26 @@ export class InMemoryStore implements IAppendOnlyStore {
     limit?: number
   ): Promise<IStreamData[]> {
     return Promise.resolve(this._allData.slice(skip).slice(0, limit));
+  }
+
+  public async readAllRecordsInRange({
+    afterTs,
+    beforeTs
+  }: {
+    afterTs: number;
+    beforeTs?: number;
+  }) {
+    // Predicate function checking `before` condition if defined
+    const pBefore: StreamDataPredicate = e =>
+      beforeTs === undefined || e.timestamp < beforeTs;
+
+    // Predicate function checking `after` condition if defined
+    const pAfter: StreamDataPredicate = e =>
+      afterTs === undefined || e.timestamp > afterTs;
+
+    return Promise.resolve(
+      this._allData.filter(record => pBefore(record) && pAfter(record))
+    );
   }
 
   private async _getVersion(streamId: string): Promise<number> {

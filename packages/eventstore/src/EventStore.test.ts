@@ -56,7 +56,7 @@ stores.forEach(({ opts, setup, store, type }) => {
   let createStore: (additionalOpts?: IEventStoreOptions) => IEventStore;
 
   describe(type, () => {
-    beforeEach(async done => {
+    beforeEach(async () => {
       if (setup !== undefined) {
         await setup();
       }
@@ -64,8 +64,6 @@ stores.forEach(({ opts, setup, store, type }) => {
       eventStore = new store(opts as any);
       createStore = additionalOpts =>
         new store({ ...opts, ...additionalOpts } as any);
-
-      done();
     });
 
     describe('saving events', () => {
@@ -148,11 +146,10 @@ stores.forEach(({ opts, setup, store, type }) => {
 
       const widget2Events: IDomainEvent[] = [event1, event1, event2, event1];
 
-      beforeEach(async done => {
+      beforeEach(async () => {
         await eventStore.save(counterAggregateId, counterEvents, 0);
         await eventStore.save(widget1Id, widget1Events, 0);
         await eventStore.save(widget2Id, widget2Events, 0);
-        done();
       });
 
       describe('single aggregate', () => {
@@ -241,6 +238,58 @@ stores.forEach(({ opts, setup, store, type }) => {
 
           expect(subsetEvents[4].id).toBe(34);
           expect(subsetEvents[4].aggregate.name).toBe('widget');
+        });
+
+        describe('timestamp-based', () => {
+          const delay = (interval: number) =>
+            new Promise(resolve => {
+              setTimeout(() => resolve(), interval);
+            });
+
+          const delayedInsert = async (
+            id: IAggregateIdentifier,
+            events: IDomainEvent[],
+            version: number
+          ) => {
+            await delay(10);
+            await eventStore.save(id, events, version);
+          };
+
+          it('should retrieve events before a given timestamp', async () => {
+            const ts = Date.now();
+
+            await delayedInsert(
+              widget1Id,
+              [createEvent('foo')],
+              widget1Events.length
+            );
+
+            const subsetEvents = await eventStore.loadAllEventsByTimestamp({
+              beforeTs: ts
+            });
+
+            expect(
+              subsetEvents.reduce((prev, e) => prev && e.timestamp < ts, true)
+            ).toBe(true);
+          });
+
+          it('should retrieve events after a given timestamp', async () => {
+            const ts = Date.now();
+
+            await delayedInsert(
+              widget1Id,
+              [createEvent('foo')],
+              widget1Events.length
+            );
+
+            const subsetEvents = await eventStore.loadAllEventsByTimestamp({
+              afterTs: ts
+            });
+
+            // Have only saved one event since demarcation timestamp
+            expect(subsetEvents.length).toBe(1);
+            expect(subsetEvents[0].timestamp).toBeGreaterThan(ts);
+          });
         });
       });
 
