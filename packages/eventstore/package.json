@@ -1,6 +1,6 @@
 {
   "name": "@eskit/eventstore",
-  "version": "3.7.0",
+  "version": "3.9.0",
   "description": "Event store for the eskit ecosystem",
   "author": "Jonathan Windridge <jonathan.windridge@trium-capital.com>",
   "homepage": "https://github.com/authentik8/eskit",

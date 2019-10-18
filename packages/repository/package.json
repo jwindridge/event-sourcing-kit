@@ -1,6 +1,6 @@
 {
   "name": "@eskit/repository",
-  "version": "3.8.0",
+  "version": "3.9.0",
   "description": "Aggregate repository implementations for the eskit ecosystem",
   "author": "Jonathan Windridge <jonathan.windridge@trium-capital.com>",
   "homepage": "https://github.com/authentik8/event-sourcing-kit#readme",
@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@eskit/core": "^3.7.0",
-    "@eskit/eventstore": "^3.7.0",
+    "@eskit/eventstore": "^3.9.0",
     "debug": "^4.1.1",
     "inversify": "^5.0.1",
     "uuid": "^3.3.2"
